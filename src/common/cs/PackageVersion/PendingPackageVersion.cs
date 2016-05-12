@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Hark.HarkPackageManager;
 
+using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
 using System.IO;
@@ -8,14 +8,12 @@ using System;
 
 namespace Hark.HarkPackageManager.Library
 {
-    using Connector = Func<IEnumerable<Stream>>;
-    
     public class PendingPackageVersion : IPackageVersion
     {
-        public PendingPackageVersion(BigInteger uid, Connector connector)
+        public PendingPackageVersion(UID uid, Connector connector)
         {
             this.Connector = connector;
-            this.UID = uid;
+            this.Uid = uid;
         }
         
         private readonly Connector Connector;
@@ -25,8 +23,8 @@ namespace Hark.HarkPackageManager.Library
             if(packageVersion == null)
                 return;
             
-            packageVersion = Connector()
-                .Peek(s => { s.Write("version " + UID); s.Flush(); })
+            packageVersion = Connector(Uid)
+                .Peek(s => { s.Write("version " + Uid); s.Flush(); })
                 .Where(s => s.ReadByte() == 1)
                 .Select(s => s.ReadPackageVersion(Connector))
                 .DefaultIfEmpty(null)
@@ -36,7 +34,7 @@ namespace Hark.HarkPackageManager.Library
                 throw new NotFoundException();
         }
         
-        public BigInteger UID
+        public UID Uid
         {
             get;
             private set;
@@ -84,12 +82,12 @@ namespace Hark.HarkPackageManager.Library
             }
         }
         
-        public IPackage Package
+        public UID PackageUid
         {
             get
             {
                 Load();
-                return packageVersion.Package;
+                return packageVersion.PackageUid;
             }
         }
         
@@ -116,11 +114,11 @@ namespace Hark.HarkPackageManager.Library
     {
         public static PendingPackageVersion ReadPendingPackageVersion(this Stream stream, Connector connector)
         {
-            return new PendingPackageVersion(stream.ReadBigInteger(), connector);
+            return new PendingPackageVersion(stream.ReadUid(), connector);
         }
         public static void Write(this Stream stream, PendingPackageVersion ppv)
         {
-            stream.Write(ppv.UID);
+            stream.Write(ppv.Uid);
             stream.Flush();
         }
     }

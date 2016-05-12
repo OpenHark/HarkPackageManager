@@ -5,8 +5,5 @@ using System.IO;
 
 namespace Hark.HarkPackageManager.Library
 {
-    public interface AccessRestriction
-    {
-        bool CanAccess(AccessRestrictionArgs args);
-    }
+    public delegate IEnumerable<Stream> Connector(UID uid);
 }

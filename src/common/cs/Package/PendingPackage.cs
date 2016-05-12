@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Hark.HarkPackageManager;
 
+using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
 using System.IO;
@@ -8,14 +8,12 @@ using System;
 
 namespace Hark.HarkPackageManager.Library
 {
-    using Connector = Func<IEnumerable<Stream>>;
-    
     public class PendingPackage : IPackage
     {
-        public PendingPackage(BigInteger uid, Connector connector)
+        public PendingPackage(UID uid, Connector connector)
         {
             this.Connector = connector;
-            this.UID = uid;
+            this.Uid = uid;
         }
         
         private readonly Connector Connector;
@@ -25,7 +23,7 @@ namespace Hark.HarkPackageManager.Library
             if(package != null)
                 return;
             
-            package = Connector()
+            package = Connector(Uid)
                 .Peek(s => { s.Write(""); s.Flush(); })
                 .Where(s => s.ReadByte() == 1)
                 .Select(s => s.ReadPackage(Connector))
@@ -36,7 +34,7 @@ namespace Hark.HarkPackageManager.Library
                 throw new NotFoundException();
         }
         
-        public BigInteger UID
+        public UID Uid
         {
             get;
             private set;
@@ -108,7 +106,7 @@ namespace Hark.HarkPackageManager.Library
     {
         public static PendingPackage ReadPendingPackage(this Stream stream, Connector connector)
         {
-            return new PendingPackage(stream.ReadBigInteger(), connector);
+            return new PendingPackage(stream.ReadUid(), connector);
         }
     }
 }

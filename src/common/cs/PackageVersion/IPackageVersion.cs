@@ -1,13 +1,13 @@
-using System.Collections.Generic;
 using Hark.HarkPackageManager;
 
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Hark.HarkPackageManager.Library
 {
     public interface IPackageVersion
     {
-        BigInteger UID
+        UID Uid
         {
             get;
         }
@@ -27,7 +27,7 @@ namespace Hark.HarkPackageManager.Library
             get;
             set;
         }
-        IPackage Package
+        UID PackageUid
         {
             get;
         }

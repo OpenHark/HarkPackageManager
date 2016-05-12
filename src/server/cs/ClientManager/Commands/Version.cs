@@ -26,7 +26,7 @@ namespace Hark.HarkPackageManager.Server.Commands
                 {
                     PackageVersion pv = Context.Packages
                         .SelectMany(p => p.Versions)
-                        .Where(v => v.UID == uid)
+                        .Where(v => v.Uid.Id == uid)
                         .Cast<PackageVersion>()
                         .First(); // Throw if none found
                     

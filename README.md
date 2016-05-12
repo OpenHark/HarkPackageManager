@@ -131,7 +131,7 @@ Here are some arguments taken by `hpmserver start` :
 
 - Server
   - [ ] Add `hpmserver stop` command
-  - [ ] Add optional log system (for public users only)
+  - [ ] Add web server
 - Client
   - [ ] Add secured password console (for user system)
   - [ ] Add cryptography (to encrypt/decrypt packages)

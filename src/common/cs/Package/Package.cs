@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Hark.HarkPackageManager;
 
+using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
 using System.IO;
@@ -8,29 +8,29 @@ using System;
 
 namespace Hark.HarkPackageManager.Library
 {
-    using Connector = Func<IEnumerable<Stream>>;
-    
     public class Package : IPackage
     {
         public Package(
             string shortName,
             string name,
             string description = "",
-            BigInteger? uid = null,
+            UID uid = null,
             PackageState state = PackageState.Release,
-            List<IPackageVersion> versions = null)
+            List<IPackageVersion> versions = null,
+            List<AccessRestriction> accessRestrictions = null)
         {
+            this.AccessRestrictions = accessRestrictions ?? new List<AccessRestriction>();
             this.Description = description;
             this.ShortName = shortName;
             this.Versions = versions ?? new List<IPackageVersion>();
             this.State = state;
             this.Name = name;
-            this.UID = uid ?? UIDManager.Reserve();
+            this.Uid = uid ?? UIDManager.Instance.Reserve();
             
-            UIDManager.Update(this.UID);
+            UIDManager.Instance.Update(this.Uid);
         }
         
-        public BigInteger UID
+        public UID Uid
         {
             get;
             private set;
@@ -61,6 +61,17 @@ namespace Hark.HarkPackageManager.Library
             get;
             private set;
         }
+        public List<AccessRestriction> AccessRestrictions
+        {
+            get;
+            private set;
+        }
+        
+        public bool IsAuthorized(AccessRestrictionArgs args)
+        {
+            return AccessRestrictions
+                .Any(a => a.CanAccess(args));
+        }
     }
     
     public static partial class Extensions
@@ -68,7 +79,7 @@ namespace Hark.HarkPackageManager.Library
         public static Package ReadPackage(this Stream stream, Connector connector)
         {
             return new Package(
-                uid : stream.ReadBigInteger(),
+                uid : stream.ReadUid(),
                 shortName : stream.ReadString(),
                 name : stream.ReadString(),
                 description : stream.ReadString(),
@@ -81,7 +92,7 @@ namespace Hark.HarkPackageManager.Library
         }
         public static void Write(this Stream stream, Package package)
         {
-            stream.Write(package.UID);
+            stream.Write(package.Uid);
             stream.Write(package.ShortName);
             stream.Write(package.Name);
             stream.Write(package.Description);
@@ -90,7 +101,40 @@ namespace Hark.HarkPackageManager.Library
             stream.Write(package.Versions.Count());
             package
                 .Versions
-                .Select(v => v.UID)
+                .Select(v => v.Uid)
+                .ForEach(stream.Write);
+                
+            stream.Flush();
+        }
+        
+        public static Package ReadFullPackage(this Stream stream, Connector connector)
+        {
+            Package p = new Package(
+                uid : stream.ReadUid(),
+                shortName : stream.ReadString(),
+                name : stream.ReadString(),
+                description : stream.ReadString(),
+                state : stream.ReadPackageState(),
+                versions : new object[stream.ReadInt()]
+                    .Select(_ => stream.ReadPackageVersion(connector))
+                    .Cast<IPackageVersion>()
+                    .ToList()
+            );
+            
+            return p;
+        }
+        public static void DeepWrite(this Stream stream, Package package)
+        {
+            stream.Write(package.Uid);
+            stream.Write(package.ShortName);
+            stream.Write(package.Name);
+            stream.Write(package.Description);
+            stream.Write(package.State);
+            
+            stream.Write(package.Versions.Count());
+            package
+                .Versions
+                .Cast<PackageVersion>()
                 .ForEach(stream.Write);
                 
             stream.Flush();

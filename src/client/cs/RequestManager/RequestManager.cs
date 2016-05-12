@@ -1,3 +1,4 @@
+using Hark.HarkPackageManager.Library;
 using Hark.HarkPackageManager;
 
 using System.Text.RegularExpressions;
@@ -25,16 +26,13 @@ namespace Hark.HarkPackageManager.Client
             private set;
         }
         
-        public IEnumerable<Stream> ConnectRepositories()
+        public IEnumerable<Stream> ConnectRepositories(string cmdLine = null, UID uid = null)
         {
             return Repositories
+                .Where(r => uid == null || r.RepositoryName == uid.RepositoryName)
                 .Select(r => r.Connect())
-                .Where(s => s != null);
-        }
-        public IEnumerable<Stream> ConnectRepositories(string cmdLine)
-        {
-            return ConnectRepositories()
-                .Peek(s => s.Write(cmdLine.GetBytes()))
+                .Where(s => s != null)
+                .Peek(s => { if(cmdLine != null) s.Write(cmdLine.GetBytes()); })
                 .Where(s => s.ReadBool());
         }
         

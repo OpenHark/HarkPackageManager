@@ -33,16 +33,64 @@ namespace Hark.HarkPackageManager.Server
                     || rname.IsMatch(p.Description));
         }
         
-        public bool Save()
+        public bool Save(string filePath = null)
         {
-            // TODO : ...
-            return false;
+            if(filePath == null)
+                filePath = Starter.Settings.packageFilePath;
+            
+            try
+            {
+                using(Stream stream = File.Open(filePath, FileMode.Create))
+                {
+                    return Save(stream);
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+        public bool Save(Stream stream)
+        {
+            try
+            {
+                stream.Write(Packages.Count());
+                Packages.ForEach(stream.DeepWrite);
+                stream.Flush();
+                
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
         
         public static Context Load(string filePath)
         {
             Context context = new Context();
-            // TODO : ...
+            
+            return context;
+        }
+        public static Context Load(Stream stream)
+        {
+            Context context = new Context();
+            
+            try
+            {
+                int size = stream.ReadInt();
+                context.Packages = new object[size]
+                    .Select(_ => stream.ReadFullPackage(null))
+                    .ToList();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+            
             return context;
         }
     }

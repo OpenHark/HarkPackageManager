@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using Hark.HarkPackageManager;
 
+using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
 using System.IO;
@@ -8,16 +8,14 @@ using System;
 
 namespace Hark.HarkPackageManager.Library
 {
-    using Connector = Func<IEnumerable<Stream>>;
-    
     public class PackageVersion : IPackageVersion
     {
         public PackageVersion(
             int version,
             bool isStable,
             string description,
-            IPackage package,
-            BigInteger? uid = null,
+            UID package,
+            UID uid = null,
             List<Dependency> dependencies = null,
             List<PackageFile> files = null)
         {
@@ -25,14 +23,14 @@ namespace Hark.HarkPackageManager.Library
             this.Description = description;
             this.IsStable = isStable;
             this.Version = version;
-            this.Package = package;
+            this.PackageUid = package;
             this.Files = files ?? new List<PackageFile>();
-            this.UID = uid ?? UIDManager.Reserve();
+            this.Uid = uid ?? UIDManager.Instance.Reserve();
             
-            UIDManager.Update(this.UID);
+            UIDManager.Instance.Update(this.Uid);
         }
         
-        public BigInteger UID
+        public UID Uid
         {
             get;
             private set;
@@ -53,10 +51,10 @@ namespace Hark.HarkPackageManager.Library
             get;
             set;
         }
-        public IPackage Package
+        public UID PackageUid
         {
             get;
-            private set;
+            internal set;
         }
         public List<Dependency> Dependencies
         {
@@ -74,8 +72,8 @@ namespace Hark.HarkPackageManager.Library
     {
         public static void Write(this Stream stream, PackageVersion value)
         {
-            stream.Write(value.UID);
-            stream.Write(value.Package.UID);
+            stream.Write(value.Uid);
+            stream.Write(value.PackageUid);
             stream.Write(value.Version);
             stream.Write(value.IsStable);
             stream.Write(value.Description);
@@ -91,8 +89,8 @@ namespace Hark.HarkPackageManager.Library
         public static PackageVersion ReadPackageVersion(this Stream stream, Connector connector)
         {
             return new PackageVersion(
-                uid : stream.ReadBigInteger(),
-                package : stream.ReadPendingPackage(connector),
+                uid : stream.ReadUid(),
+                package : stream.ReadUid(),
                 version : stream.ReadInt(),
                 isStable : stream.ReadBool(),
                 description : stream.ReadString(),

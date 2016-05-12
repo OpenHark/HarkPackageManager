@@ -10,16 +10,16 @@ namespace Hark.HarkPackageManager.Library
         public PackageFile(
             string description,
             string destinationPath,
-            BigInteger? uid = null)
+            UID uid = null)
         {
             this.DestinationPath = destinationPath;
             this.Description = description;
-            this.UID = uid ?? UIDManager.Reserve();
+            this.UID = uid ?? UIDManager.Instance.Reserve();
             
-            UIDManager.Update(this.UID);
+            UIDManager.Instance.Update(this.UID);
         }
         
-        public BigInteger UID
+        public UID UID
         {
             get;
             private set;
@@ -43,7 +43,7 @@ namespace Hark.HarkPackageManager.Library
         public static PackageFile ReadPackageFile(this Stream stream)
         {
             return new PackageFile(
-                uid : stream.ReadBigInteger(),
+                uid : stream.ReadUid(),
                 description : stream.ReadString(),
                 destinationPath : stream.ReadString()
             );

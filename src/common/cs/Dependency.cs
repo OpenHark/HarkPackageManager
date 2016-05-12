@@ -10,16 +10,16 @@ namespace Hark.HarkPackageManager.Library
         public Dependency(
             string shortName,
             int? versionMin = null,
-            BigInteger? uid = null)
+            UID uid = null)
         {
             this.VersionMin = versionMin;
             this.ShortName = shortName;
-            this.UID = uid ?? UIDManager.Reserve();
+            this.Uid = uid ?? UIDManager.Instance.Reserve();
             
-            UIDManager.Update(this.UID);
+            UIDManager.Instance.Update(this.Uid);
         }
         
-        public BigInteger UID
+        public UID Uid
         {
             get;
             private set;
@@ -43,14 +43,14 @@ namespace Hark.HarkPackageManager.Library
         public static Dependency ReadDependency(this Stream stream)
         {
             return new Dependency(
-                uid : stream.ReadBigInteger(),
+                uid : stream.ReadUid(),
                 shortName : stream.ReadString(),
                 versionMin : stream.ReadIntNull()
             );
         }
         public static void Write(this Stream stream, Dependency dependency)
         {
-            stream.Write(dependency.UID);
+            stream.Write(dependency.Uid);
             stream.Write(dependency.ShortName);
             stream.Write(dependency.VersionMin);
                 

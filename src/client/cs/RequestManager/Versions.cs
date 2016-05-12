@@ -16,7 +16,7 @@ namespace Hark.HarkPackageManager.Client
             {
                 Stream stream = ConnectRepositories("versions " + name).First();
                 var result = new byte[stream.ReadInt()]
-                    .Select(_ => stream.ReadPackageVersion(ConnectRepositories))
+                    .Select(_ => stream.ReadPackageVersion(u => ConnectRepositories(uid:u)))
                     .ToList();
                     
                 int nbFound = result.Count();
@@ -28,7 +28,7 @@ namespace Hark.HarkPackageManager.Client
                 {
                     Console.WriteLine("Found " + nbFound + " version" + nbFound.ToPlural() + " matching the package name with \"" + name + "\".");
                     result
-                        .Select(p => p.Version + " " + p.UID)
+                        .Select(p => p.Version + " " + p.Uid)
                         .ForEach(x => Console.WriteLine(x));
                 }
             }

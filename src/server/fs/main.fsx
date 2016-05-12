@@ -23,6 +23,7 @@ module public Settings =
     
     let mutable port = getOr "Port" "60000" |> Parse.parseUInt16 |> Option.get
     let mutable scope = IPAddress.Any
+    let mutable packageFilePath = getOr "PackageFilePath" "pks.hpm"
     
 module public Methods =
     type ClientManager = delegate of Stream -> bool

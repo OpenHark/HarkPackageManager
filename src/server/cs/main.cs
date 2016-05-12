@@ -13,11 +13,11 @@ namespace Hark.HarkPackageManager.Server
         public static PackageVersion CreateTest(Package parent)
         {
             return new PackageVersion(
-                uid : new BigInteger(123456),
+                uid : new UID("", 123456),
                 version : 10,
                 isStable : true,
                 description : "Ho ho ho",
-                package : parent
+                package : parent.Uid
             );
         }
         

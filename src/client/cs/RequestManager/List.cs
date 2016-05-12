@@ -16,7 +16,7 @@ namespace Hark.HarkPackageManager.Client
                 .Select(s =>
                 {
                     return new byte[s.ReadInt()]
-                        .Select(_ => s.ReadPackage(ConnectRepositories));
+                        .Select(_ => s.ReadPackage(uid => ConnectRepositories(uid:uid)));
                 })
                 .DefaultIfEmpty(Enumerable.Empty<Package>())
                 .SelectMany(e => e)

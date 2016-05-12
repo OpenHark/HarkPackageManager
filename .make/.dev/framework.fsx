@@ -108,7 +108,7 @@ module Compilation =
         header + Environment.NewLine + " :: " + name + Environment.NewLine + h + errorMsg + Environment.NewLine + "==================================="
         |> Console.Error.WriteLine
         
-    let run name cmd arguments =
+    let runGet name cmd arguments =
         let displayError = displayError name
         try
             let procStartInfo = new System.Diagnostics.ProcessStartInfo(cmd, arguments)
@@ -119,9 +119,32 @@ module Compilation =
             let proc = new System.Diagnostics.Process()
             proc.StartInfo <- procStartInfo
             proc.Start() |> ignore
+            
+            let readStreamToEnd stream =
+                try
+                    let rec readLine (stream : StreamReader) (txt : string) =
+                        match stream.ReadLine() with
+                        | null -> txt
+                        | line ->
+                            readLine stream (txt + Environment.NewLine + line)
+                    readLine stream ""
+                with
+                | _ -> ""
+            
+            let output = readStreamToEnd proc.StandardOutput
+            let error = readStreamToEnd proc.StandardError
             proc.WaitForExit()
-            let output = proc.StandardOutput.ReadToEnd()
-            let error = proc.StandardError.ReadToEnd()
+            (output, error)
+        with
+        | ex ->
+            displayError true ex.Message <| cmd + " " + arguments
+            raise ex
+        
+    let run name cmd arguments =
+        let displayError = displayError name
+        try
+            let output, error = runGet name cmd arguments
+            
             if String.length output <> 0 then
                 output |> Console.WriteLine
             if String.length error <> 0 then
@@ -136,17 +159,8 @@ module Compilation =
         let pattern = new Regex(spattern, RegexOptions.Multiline ||| RegexOptions.Compiled ||| RegexOptions.IgnoreCase)
         let displayError = displayError name
         try
-            let procStartInfo = new System.Diagnostics.ProcessStartInfo(cmd, arguments)
-            procStartInfo.RedirectStandardError <- true
-            procStartInfo.RedirectStandardOutput <- true
-            procStartInfo.UseShellExecute <- false
-            procStartInfo.CreateNoWindow <- true
-            let proc = new System.Diagnostics.Process()
-            proc.StartInfo <- procStartInfo
-            proc.Start() |> ignore
-            proc.WaitForExit()
-            let output = proc.StandardOutput.ReadToEnd()
-            let error = proc.StandardError.ReadToEnd()
+            let output, error = runGet name cmd arguments
+            
             let regexMatched = pattern.IsMatch(output)
             let isGood = String.length error = 0 && not regexMatched
             if not isGood then

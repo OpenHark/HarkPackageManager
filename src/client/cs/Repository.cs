@@ -28,6 +28,12 @@ namespace Hark.HarkPackageManager.Client
             private set;
         }
         
+        public string RepositoryName
+        {
+            get;
+            private set;
+        }
+        
         public Stream Connect(int timeout = 1000)
         {
             TcpClient client = new TcpClient(Ip, Port);

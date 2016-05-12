@@ -16,9 +16,9 @@ namespace Hark.HarkPackageManager.Client
             {
                 IPackageVersion pv = ConnectRepositories("version " + uid)
                     .First()
-                    .ReadPackageVersion(ConnectRepositories);
+                    .ReadPackageVersion(u => ConnectRepositories(uid:u));
                     
-                Console.WriteLine(pv.UID + " " + pv.Description);
+                Console.WriteLine(pv.Uid + " " + pv.Description);
             }
             catch
             {

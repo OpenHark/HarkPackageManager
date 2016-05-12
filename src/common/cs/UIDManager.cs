@@ -5,26 +5,39 @@ using System.IO;
 
 namespace Hark.HarkPackageManager.Library
 {
-    public static class UIDManager
+    public class UIDManager
     {
-        private static readonly object uidMutex = new object();
-        private static BigInteger suid = BigInteger.Zero;
+        private UIDManager(string repositoryName)
+        {
+            this.RepositoryName = repositoryName;
+        }
         
-        public static BigInteger Reserve()
+        public static UIDManager Instance = new UIDManager("Default");
+        
+        private readonly object uidMutex = new object();
+        private BigInteger suid = BigInteger.Zero;
+        
+        public string RepositoryName
+        {
+            get;
+            private set;
+        }
+        
+        public UID Reserve()
         {
             lock(uidMutex)
             {
                 ++suid;
-                return suid;
+                return new UID(RepositoryName, suid);
             }
         }
         
-        public static void Update(BigInteger uid)
+        public void Update(UID uid)
         {
             lock(uidMutex)
             {
-                if(suid < uid)
-                    suid = uid;
+                if(suid < uid.Id)
+                    suid = uid.Id;
             }
         }
     }
