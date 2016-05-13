@@ -10,8 +10,9 @@ namespace Hark.HarkPackageManager.Client
 {
     public class Repository
     {
-        public Repository(string ip, ushort port)
+        public Repository(string Name, string ip, int port)
         {
+            this.Name = Name;
             this.Port = port;
             this.Ip = ip;
         }
@@ -22,16 +23,21 @@ namespace Hark.HarkPackageManager.Client
             private set;
         }
         
-        public ushort Port
+        public int Port
         {
             get;
             private set;
         }
         
-        public string RepositoryName
+        public string Name
         {
             get;
             private set;
+        }
+        
+        public override string ToString()
+        {
+            return Name + "@" + Ip + ":" + Port;
         }
         
         public Stream Connect(int timeout = 1000)
@@ -42,22 +48,69 @@ namespace Hark.HarkPackageManager.Client
             return stream;
         }
         
+        public override bool Equals(Object obj)
+        {
+            Repository r = obj as Repository; 
+            if (r == null)
+                return false;
+            
+            return Name.Equals(r.Name)
+                && Port.Equals(r.Port)
+                && Ip.Equals(r.Ip);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode()
+                + this.Port.GetHashCode()
+                + this.Ip.GetHashCode();
+        }
+        
+        public static Repository Parse(string repo)
+        {
+            if(repo == null)
+                throw new ArgumentNullException();
+                
+            try
+            {
+                repo = repo.Trim();
+                
+                int ipIndex = repo.IndexOf('@');
+                int portIndex = repo.IndexOf(':');
+                
+                if(ipIndex == -1 || portIndex == -1)
+                    throw new FormatException();
+                
+                return new Repository(
+                    Name : repo.Substring(0, ipIndex),
+                    ip : repo.Substring(ipIndex + 1, portIndex - ipIndex - 1),
+                    port : int.Parse(repo.Substring(portIndex + 1))
+                );
+            }
+            catch
+            {
+                throw new FormatException();
+            }
+        }
+        public static bool TryParse(string repo, out Repository value)
+        {
+            try
+            {
+                value = Parse(repo);
+                return true;
+            }
+            catch
+            {
+                value = null;
+                return false;
+            }
+        }
+        
         public static List<Repository> Load(string filePath)
         {
             return File.ReadLines(filePath)
-                .Select(s => s.Trim())
-                .Where(s => s.Length > 0)
-                .Select(s => s.Split(':'))
-                .Where(xs => xs.Length == 2)
-                .Select(xs => Tuple.Create(xs[0].Trim(), xs[1].Trim()))
-                .Where(t => t.Item1.Length > 0 && t.Item2.Length > 0)
-                .Select(t =>
-                {
-                    ushort value;
-                    if(ushort.TryParse(t.Item2, out value))
-                        return new Repository(t.Item1, value);
-                    return null;
-                }).Where(x => x != null)
+                .Select(Parse)
+                .Where(x => x != null)
                 .ToList();
         }
         
@@ -72,7 +125,7 @@ namespace Hark.HarkPackageManager.Client
         public static void Write(Stream stream, IEnumerable<Repository> repos)
         {
             repos
-                .Select(r => r.Ip + ":" + r.Port + "\r\n")
+                .Select(r => r.ToString() + "\r\n")
                 .ForEach(stream.Write);
         }
     }

@@ -9,9 +9,9 @@ namespace Hark.HarkPackageManager.Client
 {
     public partial class RequestManager
     {
-        public void AddRepo(string ip, ushort port)
+        public void AddRepo(string name, string ip, int port)
         {
-            Repositories.Add(new Repository(ip, port));
+            Repositories.Add(new Repository(name, ip, port));
             SaveRepositories();
         }
     }

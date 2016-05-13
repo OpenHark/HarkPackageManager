@@ -10,6 +10,8 @@ namespace Hark.HarkPackageManager.Client
     {
         public static void Main(string[] args)
         {
+            AccessRestrictionBuilder.LoadDefaultBuilders();
+            
             RequestManager rm = new RequestManager();
             
             rm.LoadRepositories();

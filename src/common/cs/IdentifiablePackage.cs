@@ -6,7 +6,7 @@ namespace Hark.HarkPackageManager.Library
 {
     public interface IdentifiablePackage
     {
-        UID Uid
+        PackageUID Uid
         {
             get;
         }

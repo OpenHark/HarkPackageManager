@@ -17,6 +17,8 @@ open System
 open Standard.Std
 open Standard
 
+open Hark.HarkPackageManager.Library
+
 module public Settings =
     open Configuration.File
     do settings <- readSettings (Path.Combine(Environment.HOME, ".hpm.ini"))
@@ -26,29 +28,41 @@ module public Settings =
 module public Methods =
     [<AllowNullLiteral>]
     type public IRequestManager =
-        abstract member List : string -> unit // name
-        abstract member Versions : string -> unit // name
-        abstract member Version : string -> unit // version's uid
-        abstract member AddRepo : string * uint16 -> unit // ip * port
-        abstract member RemoveRepo : string * uint16 -> unit // ip * port
+        abstract member List : string * UserAuthentication -> unit // name * user
+        abstract member Versions : string * UserAuthentication -> unit // name * user
+        abstract member Version : string * UserAuthentication -> unit // version's uid * user
+        abstract member AddRepo : string * string * int -> unit // name * ip * port
+        abstract member RemoveRepo : string * string * int -> unit // name * ip * port
     
     let mutable RequestManager : IRequestManager = null
 
 module public EntryPoint =
+    let (|UA|_|) = Parse.tryParseWith UserAuthentication.TryParse
     let rm = lazy(Methods.RequestManager)
     let rec mainl = function
     | "list"::[] ->
-        rm.Value.List("*")
+        rm.Value.List("*", UserAuthentication.NoUserAuthentication)
+    | "list"::UA(ua)::[] ->
+        rm.Value.List("*", ua)
     | "list"::name::[] ->
-        rm.Value.List(name)
+        rm.Value.List(name, UserAuthentication.NoUserAuthentication)
+    | "list"::name::UA(ua)::[] ->
+        rm.Value.List(name, ua)
+        
     | "version"::uid::[] ->
-        rm.Value.Version(uid)
+        rm.Value.Version(uid, UserAuthentication.NoUserAuthentication)
+    | "version"::uid::UA(ua)::[] ->
+        rm.Value.Version(uid, ua)
+        
     | "versions"::name::[] ->
-        rm.Value.Versions(name)
-    | "repo"::"add"::(Parse.Ip(_) & ip)::Parse.UInt16(port)::[] ->
-        rm.Value.AddRepo(ip, port)
-    | "repo"::"remove"::(Parse.Ip(_) & ip)::Parse.UInt16(port)::[] ->
-        rm.Value.RemoveRepo(ip, port)
+        rm.Value.Versions(name, UserAuthentication.NoUserAuthentication)
+    | "versions"::name::UA(ua)::[] ->
+        rm.Value.Versions(name, ua)
+        
+    | "repo"::"add"::name::(Parse.Ip(_) & ip)::Parse.Int(port)::[] ->
+        rm.Value.AddRepo(name, ip, port)
+    | "repo"::"remove"::name::(Parse.Ip(_) & ip)::Parse.Int(port)::[] ->
+        rm.Value.RemoveRepo(name, ip, port)
         
     | _ ->
         // Display help

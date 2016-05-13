@@ -10,13 +10,17 @@ namespace Hark.HarkPackageManager.Client
 {
     public partial class RequestManager
     {
-        public void List(string name)
+        public void List(string name, UserAuthentication user)
         {
-            var result = ConnectRepositories("list " + name)
+            var result = ConnectRepositories(
+                    cmd : "list",
+                    args : name,
+                    user : user
+                )
                 .Select(s =>
                 {
                     return new byte[s.ReadInt()]
-                        .Select(_ => s.ReadPackage(uid => ConnectRepositories(uid:uid)));
+                        .Select(_ => s.ReadPackage(Connector));
                 })
                 .DefaultIfEmpty(Enumerable.Empty<Package>())
                 .SelectMany(e => e)

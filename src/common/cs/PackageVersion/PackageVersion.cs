@@ -14,8 +14,8 @@ namespace Hark.HarkPackageManager.Library
             int version,
             bool isStable,
             string description,
-            UID package,
-            UID uid = null,
+            PackageUID package,
+            PackageVersionUID uid = null,
             List<Dependency> dependencies = null,
             List<PackageFile> files = null)
         {
@@ -25,12 +25,12 @@ namespace Hark.HarkPackageManager.Library
             this.Version = version;
             this.PackageUid = package;
             this.Files = files ?? new List<PackageFile>();
-            this.Uid = uid ?? UIDManager.Instance.Reserve();
+            this.Uid = uid ?? UIDManager.Instance.Reserve().ForPackageVersion();
             
             UIDManager.Instance.Update(this.Uid);
         }
         
-        public UID Uid
+        public PackageVersionUID Uid
         {
             get;
             private set;
@@ -51,7 +51,7 @@ namespace Hark.HarkPackageManager.Library
             get;
             set;
         }
-        public UID PackageUid
+        public PackageUID PackageUid
         {
             get;
             internal set;
@@ -89,8 +89,8 @@ namespace Hark.HarkPackageManager.Library
         public static PackageVersion ReadPackageVersion(this Stream stream, Connector connector)
         {
             return new PackageVersion(
-                uid : stream.ReadUid(),
-                package : stream.ReadUid(),
+                uid : stream.ReadUid().ForPackageVersion(),
+                package : stream.ReadUid().ForPackage(),
                 version : stream.ReadInt(),
                 isStable : stream.ReadBool(),
                 description : stream.ReadString(),

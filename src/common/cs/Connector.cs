@@ -5,5 +5,5 @@ using System.IO;
 
 namespace Hark.HarkPackageManager.Library
 {
-    public delegate IEnumerable<Stream> Connector(UID uid);
+    public delegate IEnumerable<Stream> Connector(string cmd, string args, UID uid);
 }

@@ -138,14 +138,16 @@ Here are some arguments taken by `hpmserver start` :
   - [ ] Add list of installed packages and installed versions
   - [ ] Add command `new create <pkg-info...>` (create a new local package)
   - [ ] Add command `new edit <pkg-info...>` (edit a local package)
-  - [ ] Add command `new add <pkg-info...> <file-folder-path>` (create a zip and add it to a local package)
+  - [ ] Add command `new add right <pkg-info...> <pkg-rights>` (add rights to a local package)
+  - [ ] Add command `new remove right <pkg-info...> <pkg-rights>` (add rights to a local package)
+  - [ ] Add command `new add file <pkg-info...> <file-folder-path>` (create a zip and add it to a local package)
   - [ ] Add command `new remove <pkg-info...> <file-folder-path>` (remove a zip from a local package)
 - Library
   - [X] Finish *Dependency* | `Dependency.cs`
   - [ ] Finish *PackageFile* | `PackageFile.cs`
   - [X] Finish *Extensions* in *PackageVersion* | `PackageVersion.cs`
   - [X] Sort extensions
-  - [ ] Add user permissions on versions | {everybody, some, only me}
+  - [X] Add user permissions | {everybody, some, only me}
 - Client/Server
   - [ ] Add optional "secured" dialog
   - [ ] Add command `download <pkg>` (download a file in the current folder)

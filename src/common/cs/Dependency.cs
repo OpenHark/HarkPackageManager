@@ -10,16 +10,16 @@ namespace Hark.HarkPackageManager.Library
         public Dependency(
             string shortName,
             int? versionMin = null,
-            UID uid = null)
+            PackageUID uid = null)
         {
             this.VersionMin = versionMin;
             this.ShortName = shortName;
-            this.Uid = uid ?? UIDManager.Instance.Reserve();
+            this.Uid = uid ?? UIDManager.Instance.Reserve().ForPackage();
             
             UIDManager.Instance.Update(this.Uid);
         }
         
-        public UID Uid
+        public PackageUID Uid
         {
             get;
             private set;
@@ -43,7 +43,7 @@ namespace Hark.HarkPackageManager.Library
         public static Dependency ReadDependency(this Stream stream)
         {
             return new Dependency(
-                uid : stream.ReadUid(),
+                uid : stream.ReadUid().ForPackage(),
                 shortName : stream.ReadString(),
                 versionMin : stream.ReadIntNull()
             );

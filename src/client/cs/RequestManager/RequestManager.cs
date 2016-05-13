@@ -26,13 +26,38 @@ namespace Hark.HarkPackageManager.Client
             private set;
         }
         
-        public IEnumerable<Stream> ConnectRepositories(string cmdLine = null, UID uid = null)
+        public Connector Connector
         {
+            get
+            {
+                return (cmd, args, uid) =>
+                    ConnectRepositories(
+                        cmd : cmd,
+                        args : args,
+                        uid : uid
+                    );
+            }
+        }
+        
+        public IEnumerable<Stream> ConnectRepositories(
+            string cmd,
+            UserAuthentication user = null,
+            UID uid = null,
+            params string[] args)
+        {
+            user = user ?? UserAuthentication.NoUserAuthentication;
+            
             return Repositories
-                .Where(r => uid == null || r.RepositoryName == uid.RepositoryName)
+                .Where(r => uid == null || r.Name.ToLower() == uid.RepositoryName.ToLower())
                 .Select(r => r.Connect())
                 .Where(s => s != null)
-                .Peek(s => { if(cmdLine != null) s.Write(cmdLine.GetBytes()); })
+                .Peek(s => s.Write(cmd))
+                .Peek(s => s.Write(user ?? UserAuthentication.NoUserAuthentication))
+                .Peek(s => s.Write(args.Aggregate(
+                    "",
+                    (s1,s2) => s1 + " " + s2,
+                    ss => ss.Trim()).GetBytes()))
+                .Peek(s => s.Flush())
                 .Where(s => s.ReadBool());
         }
         

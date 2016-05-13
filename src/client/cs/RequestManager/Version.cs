@@ -10,19 +10,27 @@ namespace Hark.HarkPackageManager.Client
 {
     public partial class RequestManager
     {
-        public void Version(string uid)
+        public void Version(string suid, UserAuthentication user)
         {
             try
             {
-                IPackageVersion pv = ConnectRepositories("version " + uid)
+                UID uid = UID.Parse(suid);
+                
+                IPackageVersion pv = ConnectRepositories(
+                        cmd : "version",
+                        args : uid.Id.ToString(),
+                        uid : uid,
+                        user : user
+                    )
                     .First()
-                    .ReadPackageVersion(u => ConnectRepositories(uid:u));
+                    .ReadPackageVersion(Connector);
                     
                 Console.WriteLine(pv.Uid + " " + pv.Description);
             }
-            catch
+            catch(Exception ex)
             {
-                Console.WriteLine("Couldn't find a package with a name matching with \"" + uid + "\"");
+                Console.WriteLine(ex);
+                Console.WriteLine("Couldn't find a package with a name matching with \"" + suid + "\"");
             }
         }
     }

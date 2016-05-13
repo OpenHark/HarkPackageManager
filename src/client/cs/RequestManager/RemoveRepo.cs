@@ -9,9 +9,9 @@ namespace Hark.HarkPackageManager.Client
 {
     public partial class RequestManager
     {
-        public void RemoveRepo(string ip, ushort port)
+        public void RemoveRepo(string name, string ip, int port)
         {
-            Repositories.Remove(new Repository(ip, port));
+            Repositories.Remove(new Repository(name, ip, port));
             SaveRepositories();
         }
     }

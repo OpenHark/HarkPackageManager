@@ -10,23 +10,47 @@ namespace Hark.HarkPackageManager.Library
 {
     public class GroupAccessRestriction : AccessRestriction
     {
-        public GroupAccessRestriction(string regexGroupName)
+        public GroupAccessRestriction(UID groupUid)
         {
-            this.RegexGroupName = regexGroupName.ToWildcardRegex();
+            this.GroupUid = groupUid;
         }
         
-        public Regex RegexGroupName
+        public UID GroupUid
         {
             get;
             private set;
         }
         
+        public const int TypeUId = 1;
+        public int TypeId
+        {
+            get { return GroupAccessRestriction.TypeUId; }
+        }
+        
         public bool CanAccess(AccessRestrictionArgs args)
         {
             return args.User != null &&
-                args.User.Groups
-                .Select(g => g.Name)
-                .Any(RegexGroupName.IsMatch);
+                args.User.Groups.Any(g => g == GroupUid);
+        }
+        
+        public class StreamBuilder : IAccessRestrictionBuilder
+        {
+            public int TypeId
+            {
+                get { return GroupAccessRestriction.TypeUId; }
+            }
+            
+            public AccessRestriction Read(Stream stream)
+            {
+                return new GroupAccessRestriction(
+                    groupUid : stream.ReadUid()
+                );
+            }
+            
+            public void Write(Stream stream, AccessRestriction ar)
+            {
+                stream.Write(((GroupAccessRestriction)ar).GroupUid);
+            }
         }
     }
 }

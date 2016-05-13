@@ -10,13 +10,17 @@ namespace Hark.HarkPackageManager.Client
 {
     public partial class RequestManager
     {
-        public void Versions(string name)
+        public void Versions(string name, UserAuthentication user)
         {
             try
             {
-                Stream stream = ConnectRepositories("versions " + name).First();
+                Stream stream = ConnectRepositories(
+                    cmd : "versions",
+                    args : name,
+                    user : user
+                ).First();
                 var result = new byte[stream.ReadInt()]
-                    .Select(_ => stream.ReadPackageVersion(u => ConnectRepositories(uid:u)))
+                    .Select(_ => stream.ReadPackageVersion(Connector))
                     .ToList();
                     
                 int nbFound = result.Count();

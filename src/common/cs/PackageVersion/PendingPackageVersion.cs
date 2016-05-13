@@ -10,7 +10,7 @@ namespace Hark.HarkPackageManager.Library
 {
     public class PendingPackageVersion : IPackageVersion
     {
-        public PendingPackageVersion(UID uid, Connector connector)
+        public PendingPackageVersion(PackageVersionUID uid, Connector connector)
         {
             this.Connector = connector;
             this.Uid = uid;
@@ -23,8 +23,7 @@ namespace Hark.HarkPackageManager.Library
             if(packageVersion == null)
                 return;
             
-            packageVersion = Connector(Uid)
-                .Peek(s => { s.Write("version " + Uid); s.Flush(); })
+            packageVersion = Connector("version", Uid.ToString(), Uid)
                 .Where(s => s.ReadByte() == 1)
                 .Select(s => s.ReadPackageVersion(Connector))
                 .DefaultIfEmpty(null)
@@ -34,7 +33,7 @@ namespace Hark.HarkPackageManager.Library
                 throw new NotFoundException();
         }
         
-        public UID Uid
+        public PackageVersionUID Uid
         {
             get;
             private set;
@@ -82,7 +81,7 @@ namespace Hark.HarkPackageManager.Library
             }
         }
         
-        public UID PackageUid
+        public PackageUID PackageUid
         {
             get
             {
@@ -114,7 +113,7 @@ namespace Hark.HarkPackageManager.Library
     {
         public static PendingPackageVersion ReadPendingPackageVersion(this Stream stream, Connector connector)
         {
-            return new PendingPackageVersion(stream.ReadUid(), connector);
+            return new PendingPackageVersion(stream.ReadUid().ForPackageVersion(), connector);
         }
         public static void Write(this Stream stream, PendingPackageVersion ppv)
         {

@@ -7,7 +7,7 @@ namespace Hark.HarkPackageManager.Library
 {
     public interface IPackageVersion
     {
-        UID Uid
+        PackageVersionUID Uid
         {
             get;
         }
@@ -17,24 +17,29 @@ namespace Hark.HarkPackageManager.Library
             get;
             set;
         }
+        
         bool IsStable
         {
             get;
             set;
         }
+        
         string Description
         {
             get;
             set;
         }
-        UID PackageUid
+        
+        PackageUID PackageUid
         {
             get;
         }
+        
         List<Dependency> Dependencies
         {
             get;
         }
+        
         List<PackageFile> Files
         {
             get;

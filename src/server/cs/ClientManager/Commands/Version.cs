@@ -25,6 +25,7 @@ namespace Hark.HarkPackageManager.Server.Commands
                 lock(Context)
                 {
                     PackageVersion pv = Context.Packages
+                        .Where(p => p.IsAuthorized(CreateAccessestrictionArgs()))
                         .SelectMany(p => p.Versions)
                         .Where(v => v.Uid.Id == uid)
                         .Cast<PackageVersion>()

@@ -23,6 +23,7 @@ namespace Hark.HarkPackageManager.Server.Commands
                 lock(Context)
                 {
                     Context.PackagesByName(ClientStream.ReadWord())
+                        .Where(p => p.IsAuthorized(CreateAccessestrictionArgs()))
                         .Select(p => p.Versions)
                         .First()
                         .Cast<PackageVersion>()

@@ -14,9 +14,23 @@ namespace Hark.HarkPackageManager.Server
         public Context()
         {
             this.Packages = new List<Package>();
+            this.Groups = new List<UserGroup>();
+            this.Users = new List<User>();
         }
         
         public List<Package> Packages
+        {
+            get;
+            private set;
+        }
+        
+        public List<User> Users
+        {
+            get;
+            private set;
+        }
+        
+        public List<UserGroup> Groups
         {
             get;
             private set;
@@ -82,7 +96,7 @@ namespace Hark.HarkPackageManager.Server
             {
                 int size = stream.ReadInt();
                 context.Packages = new object[size]
-                    .Select(_ => stream.ReadFullPackage(null))
+                    .Select(_ => stream.ReadDeepPackage(null))
                     .ToList();
             }
             catch(Exception ex)

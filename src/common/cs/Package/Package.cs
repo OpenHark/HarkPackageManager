@@ -14,7 +14,8 @@ namespace Hark.HarkPackageManager.Library
             string shortName,
             string name,
             string description = "",
-            UID uid = null,
+            GroupUID groupOwner = null,
+            PackageUID uid = null,
             PackageState state = PackageState.Release,
             List<IPackageVersion> versions = null,
             List<AccessRestriction> accessRestrictions = null)
@@ -25,12 +26,12 @@ namespace Hark.HarkPackageManager.Library
             this.Versions = versions ?? new List<IPackageVersion>();
             this.State = state;
             this.Name = name;
-            this.Uid = uid ?? UIDManager.Instance.Reserve();
+            this.Uid = uid ?? UIDManager.Instance.Reserve().ForPackage();
             
             UIDManager.Instance.Update(this.Uid);
         }
         
-        public UID Uid
+        public PackageUID Uid
         {
             get;
             private set;
@@ -70,7 +71,7 @@ namespace Hark.HarkPackageManager.Library
         public bool IsAuthorized(AccessRestrictionArgs args)
         {
             return AccessRestrictions
-                .Any(a => a.CanAccess(args));
+                .All(a => a.CanAccess(args));
         }
     }
     
@@ -79,7 +80,7 @@ namespace Hark.HarkPackageManager.Library
         public static Package ReadPackage(this Stream stream, Connector connector)
         {
             return new Package(
-                uid : stream.ReadUid(),
+                uid : stream.ReadUid().ForPackage(),
                 shortName : stream.ReadString(),
                 name : stream.ReadString(),
                 description : stream.ReadString(),
@@ -87,6 +88,9 @@ namespace Hark.HarkPackageManager.Library
                 versions : new object[stream.ReadInt()]
                     .Select(_ => stream.ReadPendingPackageVersion(connector))
                     .Cast<IPackageVersion>()
+                    .ToList(),
+                accessRestrictions : new object[stream.ReadInt()]
+                    .Select(_ => stream.ReadAccessRestriction())
                     .ToList()
             );
         }
@@ -104,13 +108,18 @@ namespace Hark.HarkPackageManager.Library
                 .Select(v => v.Uid)
                 .ForEach(stream.Write);
                 
+            stream.Write(package.AccessRestrictions.Count());
+            package
+                .AccessRestrictions
+                .ForEach(stream.Write);
+                
             stream.Flush();
         }
         
-        public static Package ReadFullPackage(this Stream stream, Connector connector)
+        public static Package ReadDeepPackage(this Stream stream, Connector connector)
         {
             Package p = new Package(
-                uid : stream.ReadUid(),
+                uid : stream.ReadUid().ForPackage(),
                 shortName : stream.ReadString(),
                 name : stream.ReadString(),
                 description : stream.ReadString(),
@@ -118,6 +127,9 @@ namespace Hark.HarkPackageManager.Library
                 versions : new object[stream.ReadInt()]
                     .Select(_ => stream.ReadPackageVersion(connector))
                     .Cast<IPackageVersion>()
+                    .ToList(),
+                accessRestrictions : new object[stream.ReadInt()]
+                    .Select(_ => stream.ReadAccessRestriction())
                     .ToList()
             );
             
@@ -135,6 +147,11 @@ namespace Hark.HarkPackageManager.Library
             package
                 .Versions
                 .Cast<PackageVersion>()
+                .ForEach(stream.Write);
+                
+            stream.Write(package.AccessRestrictions.Count());
+            package
+                .AccessRestrictions
                 .ForEach(stream.Write);
                 
             stream.Flush();

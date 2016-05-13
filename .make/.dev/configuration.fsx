@@ -60,7 +60,10 @@ module File =
                 match kvl, v with
                 | [], _ -> v
                 | (a,b)::n, (va, vb:string) -> replaceAll n (va, vb.Replace("%(" + a + ")", b))
-            File.ReadAllLines filePath
+            File.ReadAllText filePath
+            |> (fun s -> s.Replace("\r\n", "\n"))
+            |> (fun s -> s.Replace("\\\n", ""))
+            |> (fun s -> s.Split('\n'))
             |> Seq.map (fun l -> l.Trim())
             |> Seq.filter (fun l -> l.Length > 0)
             |> Seq.filter (fun l -> not(l.StartsWith "#"))

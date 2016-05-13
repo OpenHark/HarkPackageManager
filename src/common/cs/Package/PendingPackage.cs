@@ -10,7 +10,7 @@ namespace Hark.HarkPackageManager.Library
 {
     public class PendingPackage : IPackage
     {
-        public PendingPackage(UID uid, Connector connector)
+        public PendingPackage(PackageUID uid, Connector connector)
         {
             this.Connector = connector;
             this.Uid = uid;
@@ -23,8 +23,7 @@ namespace Hark.HarkPackageManager.Library
             if(package != null)
                 return;
             
-            package = Connector(Uid)
-                .Peek(s => { s.Write(""); s.Flush(); })
+            package = Connector("", "", Uid)
                 .Where(s => s.ReadByte() == 1)
                 .Select(s => s.ReadPackage(Connector))
                 .DefaultIfEmpty(null)
@@ -34,7 +33,7 @@ namespace Hark.HarkPackageManager.Library
                 throw new NotFoundException();
         }
         
-        public UID Uid
+        public PackageUID Uid
         {
             get;
             private set;
@@ -106,7 +105,7 @@ namespace Hark.HarkPackageManager.Library
     {
         public static PendingPackage ReadPendingPackage(this Stream stream, Connector connector)
         {
-            return new PendingPackage(stream.ReadUid(), connector);
+            return new PendingPackage(stream.ReadUid().ForPackage(), connector);
         }
     }
 }

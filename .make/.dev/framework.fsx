@@ -33,6 +33,16 @@ module Utils =
     let toAsync (fn : unit -> bool) : Async<bool> = async {
         return fn()
     }
+    
+    exception CantFindFileInPath of string
+    let findFileFromPath name =
+        let p =
+            Environment.GetEnvironmentVariable("PATH").Split(';')
+            |> Seq.map (fun x -> Path.Combine(x, name))
+            |> Seq.tryFind File.Exists
+        match p with
+        | None -> raise (CantFindFileInPath(name))
+        | Some(x) -> x
 
 module Cache =
     let hash (path : string) =
@@ -111,6 +121,7 @@ module Compilation =
     let runGet name cmd arguments =
         let displayError = displayError name
         try
+            let cmd = if File.Exists cmd then cmd else Utils.findFileFromPath cmd
             let procStartInfo = new System.Diagnostics.ProcessStartInfo(cmd, arguments)
             procStartInfo.RedirectStandardError <- true
             procStartInfo.RedirectStandardOutput <- true
@@ -136,6 +147,11 @@ module Compilation =
             proc.WaitForExit()
             (output, error)
         with
+        | Utils.CantFindFileInPath(cmd) as ex ->
+            displayError true
+            <| "Can't find the file \"" + cmd + "\" in the paths of the environment variable PATH."
+            <| cmd + " " + arguments
+            raise ex
         | ex ->
             displayError true ex.Message <| cmd + " " + arguments
             raise ex
@@ -151,9 +167,7 @@ module Compilation =
                 displayError false error <| cmd + " " + arguments
             String.length error = 0
         with
-        | ex ->
-            displayError true ex.Message <| cmd + " " + arguments
-            false
+        | _ -> false
             
     let runPattern name (spattern : string) cmd arguments =
         let pattern = new Regex(spattern, RegexOptions.Multiline ||| RegexOptions.Compiled ||| RegexOptions.IgnoreCase)
@@ -173,7 +187,5 @@ module Compilation =
                     output |> Console.WriteLine
             isGood
         with
-        | ex ->
-            displayError true ex.Message <| cmd + " " + arguments
-            false
+        | _ -> false
 

@@ -23,6 +23,7 @@ namespace Hark.HarkPackageManager.Server.Commands
             lock(Context)
             {
                 Context.PackagesByName(ClientStream.ReadWord())
+                    .Where(p => p.IsAuthorized(CreateAccessestrictionArgs()))
                     .Global(e => ClientStream.Write(e.Count()))
                     .ForEach(ClientStream.Write);
             }

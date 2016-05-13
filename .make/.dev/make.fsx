@@ -22,12 +22,12 @@ module Settings =
         let (~%) (a : string) = + a |> asArray
         
         member this.destinationPath = + "DestinationPath"
+        member this.compilerName = + "CompilerName"
         member this.docFullPath = + "DocFullPath"
         member this.references = % "References"
         member this.outputName = + "OutputName"
         member this.srcPath = + "SourcePath"
         member this.target = + "Target"
-        member this.cPath = + "CPath"
         member this.name = name
     
     type CsSettings (name : string) =
@@ -102,7 +102,7 @@ module Runtime =
             <| files
             <| doc "/doc:" settings.docFullPath
             <| refs "/reference:" settings.references)
-            |> Compilation.runPattern projName "error [A-Z]{2}\\d{4}: (.*)$" settings.cPath
+            |> Compilation.runPattern projName "error [A-Z]{2}\\d{4}: (.*)$" settings.compilerName
             |> die
             
             encache filesToCompile
@@ -130,7 +130,7 @@ module Runtime =
             <| Path.Combine(settings.srcPath, settings.entryPointFileName)
             <| doc "--doc:" settings.docFullPath
             <| refs "--reference:" settings.references)
-            |> Compilation.run projName settings.cPath
+            |> Compilation.run projName settings.compilerName
             |> die
                 
             encache filesToCompile
@@ -144,6 +144,8 @@ module Runtime =
         | :? Settings.FsSettings as s -> FsRun s
         | :? Settings.CsSettings as s -> CsRun s
         | _ -> ()
+        // Commit the cache
+        Cache.save()
 
 // Compilation list - execution
 let (~%) x = x :> Settings.GSettings
@@ -155,5 +157,3 @@ let (~%) x = x :> Settings.GSettings
     % Settings.Cs.Client
 ] |> Seq.iter Runtime.run
 
-// Commit the cache
-Cache.save()

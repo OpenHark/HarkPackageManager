@@ -66,7 +66,7 @@ namespace Hark.HarkPackageManager.Server
         {
             try
             {
-                string command = stream.ReadWord();
+                string command = stream.ReadString();
                 command = command.Trim().ToLower();
                 
                 Console.WriteLine(" :: " + command);
