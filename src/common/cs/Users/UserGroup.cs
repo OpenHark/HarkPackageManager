@@ -7,9 +7,10 @@ namespace Hark.HarkPackageManager.Library
 {
     public class UserGroup
     {
-        public UserGroup(string name, string description, UID uid = null)
+        public UserGroup(string name, string description, bool isPublic, UID uid = null)
         {
             this.Description = description;
+            this.IsPublic = isPublic;
             this.Name = name;
             this.Uid = uid ?? UIDManager.Instance.Reserve();
             
@@ -29,6 +30,12 @@ namespace Hark.HarkPackageManager.Library
         }
         
         public string Description
+        {
+            get;
+            private set;
+        }
+        
+        public bool IsPublic
         {
             get;
             private set;

@@ -18,9 +18,11 @@ namespace Hark.HarkPackageManager.Library
             PackageUID uid = null,
             PackageState state = PackageState.Release,
             List<IPackageVersion> versions = null,
-            List<AccessRestriction> accessRestrictions = null)
+            List<AccessRestriction> accessRestrictions = null,
+            List<AccessRestriction> ownerRestrictions = null)
         {
             this.AccessRestrictions = accessRestrictions ?? new List<AccessRestriction>();
+            this.OwnerRestrictions = ownerRestrictions ?? new List<AccessRestriction>();
             this.Description = description;
             this.ShortName = shortName;
             this.Versions = versions ?? new List<IPackageVersion>();
@@ -67,11 +69,16 @@ namespace Hark.HarkPackageManager.Library
             get;
             private set;
         }
+        public List<AccessRestriction> OwnerRestrictions
+        {
+            get;
+            private set;
+        }
         
         public bool IsAuthorized(AccessRestrictionArgs args)
         {
             return AccessRestrictions
-                .All(a => a.CanAccess(args));
+                .Any(a => a.CanAccess(args));
         }
     }
     
@@ -79,6 +86,8 @@ namespace Hark.HarkPackageManager.Library
     {
         public static Package ReadPackage(this Stream stream, Connector connector)
         {
+            int dataVersion = stream.ReadInt();
+            
             return new Package(
                 uid : stream.ReadUid().ForPackage(),
                 shortName : stream.ReadString(),
@@ -91,11 +100,16 @@ namespace Hark.HarkPackageManager.Library
                     .ToList(),
                 accessRestrictions : new object[stream.ReadInt()]
                     .Select(_ => stream.ReadAccessRestriction())
+                    .ToList(),
+                ownerRestrictions : new object[stream.ReadInt()]
+                    .Select(_ => stream.ReadAccessRestriction())
                     .ToList()
             );
         }
         public static void Write(this Stream stream, Package package)
         {
+            stream.Write(1); // Data version (compatibility)
+            
             stream.Write(package.Uid);
             stream.Write(package.ShortName);
             stream.Write(package.Name);
@@ -109,15 +123,18 @@ namespace Hark.HarkPackageManager.Library
                 .ForEach(stream.Write);
                 
             stream.Write(package.AccessRestrictions.Count());
-            package
-                .AccessRestrictions
-                .ForEach(stream.Write);
+            package.AccessRestrictions.ForEach(stream.Write);
+                
+            stream.Write(package.OwnerRestrictions.Count());
+            package.OwnerRestrictions.ForEach(stream.Write);
                 
             stream.Flush();
         }
         
         public static Package ReadDeepPackage(this Stream stream, Connector connector)
         {
+            int dataVersion = stream.ReadInt();
+            
             Package p = new Package(
                 uid : stream.ReadUid().ForPackage(),
                 shortName : stream.ReadString(),
@@ -130,6 +147,9 @@ namespace Hark.HarkPackageManager.Library
                     .ToList(),
                 accessRestrictions : new object[stream.ReadInt()]
                     .Select(_ => stream.ReadAccessRestriction())
+                    .ToList(),
+                ownerRestrictions : new object[stream.ReadInt()]
+                    .Select(_ => stream.ReadAccessRestriction())
                     .ToList()
             );
             
@@ -137,6 +157,8 @@ namespace Hark.HarkPackageManager.Library
         }
         public static void DeepWrite(this Stream stream, Package package)
         {
+            stream.Write(1); // Data version (compatibility)
+            
             stream.Write(package.Uid);
             stream.Write(package.ShortName);
             stream.Write(package.Name);
@@ -150,9 +172,10 @@ namespace Hark.HarkPackageManager.Library
                 .ForEach(stream.Write);
                 
             stream.Write(package.AccessRestrictions.Count());
-            package
-                .AccessRestrictions
-                .ForEach(stream.Write);
+            package.AccessRestrictions.ForEach(stream.Write);
+                
+            stream.Write(package.OwnerRestrictions.Count());
+            package.OwnerRestrictions.ForEach(stream.Write);
                 
             stream.Flush();
         }

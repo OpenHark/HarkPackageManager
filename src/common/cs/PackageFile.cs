@@ -42,6 +42,8 @@ namespace Hark.HarkPackageManager.Library
     {
         public static PackageFile ReadPackageFile(this Stream stream)
         {
+            int dataVersion = stream.ReadInt();
+            
             return new PackageFile(
                 uid : stream.ReadUid(),
                 description : stream.ReadString(),
@@ -50,6 +52,8 @@ namespace Hark.HarkPackageManager.Library
         }
         public static void Write(this Stream stream, PackageFile packageFile)
         {
+            stream.Write(1); // Data version (compatibility)
+            
             stream.Write(packageFile.UID);
             stream.Write(packageFile.Description);
             stream.Write(packageFile.DestinationPath);

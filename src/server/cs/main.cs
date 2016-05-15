@@ -31,7 +31,10 @@ namespace Hark.HarkPackageManager.Server
                 description : "The best Programming Package Manager ever!",
                 state : PackageState.Beta
             );
+            User u = new User("Abcd", new byte[] { 166, 28, 37, 78, 111, 78, 95, 232, 110, 144, 172, 82, 190, 231, 205, 140, 131, 103, 178, 249, 181, 3, 16, 65, 15, 128, 36, 210, 158, 154, 172, 171 });
+            p.AccessRestrictions.Add(new UserAccessRestriction(u.Uid));
             context.Packages.Add(p);
+            context.Users.Add(u);
             
             p.Versions.Add(CreateTest(p));
             

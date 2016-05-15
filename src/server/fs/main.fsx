@@ -8,6 +8,7 @@ namespace Hark.HarkPackageManager.Server.Starter
 
 open System.Text.RegularExpressions
 open System.IO.Compression
+open System.Diagnostics
 open System.Net.Sockets
 open System.Text
 open System.Net
@@ -45,6 +46,19 @@ module private Execution =
             let client = server.AcceptTcpClient()
             manageClient (client.GetStream())
             |> Async.Start
+            
+    let stop () =
+        let currentProcess = Process.GetCurrentProcess()
+        let currentProcessId = currentProcess.Id
+        let currentProcessPath = currentProcess.MainModule.ModuleName
+        for p in Process.GetProcesses() do
+            try
+                if p.MainModule.ModuleName = currentProcessPath && p.Id <> currentProcessId then
+                    "Killing " + p.Id.ToString() |> Console.WriteLine
+                    p.Kill()
+                    p.WaitForExit()
+            with
+            | _ -> ()
 
 module public EntryPoint =
     let displayStartHelp () =
@@ -86,6 +100,7 @@ module public EntryPoint =
             yield! [
                 " " + information.APP_NAME + " start"
                 " " + information.APP_NAME + " start ?"
+                " " + information.APP_NAME + " stop"
             ]
             return ""
         }
@@ -94,6 +109,12 @@ module public EntryPoint =
     | "start"::queue ->
         if applySettings queue then
             Execution.start()
+    | "restart"::queue ->
+        if applySettings queue then
+            Execution.stop()
+            Execution.start()
+    | "stop"::[] ->
+        Execution.stop()
     | _ -> displayHelp()
     
     let main args = args |> Array.toList |> mainl

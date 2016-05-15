@@ -72,6 +72,8 @@ namespace Hark.HarkPackageManager.Library
     {
         public static void Write(this Stream stream, PackageVersion value)
         {
+            stream.Write(1); // Data version (compatibility)
+            
             stream.Write(value.Uid);
             stream.Write(value.PackageUid);
             stream.Write(value.Version);
@@ -88,6 +90,8 @@ namespace Hark.HarkPackageManager.Library
         }
         public static PackageVersion ReadPackageVersion(this Stream stream, Connector connector)
         {
+            int dataVersion = stream.ReadInt();
+            
             return new PackageVersion(
                 uid : stream.ReadUid().ForPackageVersion(),
                 package : stream.ReadUid().ForPackage(),

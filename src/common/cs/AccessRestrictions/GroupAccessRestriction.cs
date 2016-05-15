@@ -10,12 +10,12 @@ namespace Hark.HarkPackageManager.Library
 {
     public class GroupAccessRestriction : AccessRestriction
     {
-        public GroupAccessRestriction(UID groupUid)
+        public GroupAccessRestriction(GroupUID groupUid)
         {
             this.GroupUid = groupUid;
         }
         
-        public UID GroupUid
+        public GroupUID GroupUid
         {
             get;
             private set;
@@ -42,13 +42,17 @@ namespace Hark.HarkPackageManager.Library
             
             public AccessRestriction Read(Stream stream)
             {
+                int dataVersion = stream.ReadInt();
+                
                 return new GroupAccessRestriction(
-                    groupUid : stream.ReadUid()
+                    groupUid : stream.ReadUid().ForGroup()
                 );
             }
             
             public void Write(Stream stream, AccessRestriction ar)
             {
+                stream.Write(1); // Data version (compatibility)
+                
                 stream.Write(((GroupAccessRestriction)ar).GroupUid);
             }
         }

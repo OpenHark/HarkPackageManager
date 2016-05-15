@@ -10,12 +10,12 @@ namespace Hark.HarkPackageManager.Library
 {
     public class UserAccessRestriction : AccessRestriction
     {
-        public UserAccessRestriction(UID userUid)
+        public UserAccessRestriction(UserUID userUid)
         {
             this.UserUid = userUid;
         }
         
-        public UID UserUid
+        public UserUID UserUid
         {
             get;
             private set;
@@ -41,13 +41,17 @@ namespace Hark.HarkPackageManager.Library
             
             public AccessRestriction Read(Stream stream)
             {
+                int dataVersion = stream.ReadInt();
+                
                 return new UserAccessRestriction(
-                    userUid : stream.ReadUid()
+                    userUid : stream.ReadUid().ForUser()
                 );
             }
             
             public void Write(Stream stream, AccessRestriction ar)
             {
+                stream.Write(1); // Data version (compatibility)
+                
                 stream.Write(((UserAccessRestriction)ar).UserUid);
             }
         }

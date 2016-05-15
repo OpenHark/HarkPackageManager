@@ -1,6 +1,7 @@
 using Hark.HarkPackageManager;
 
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Numerics;
 using System.Linq;
 using System.IO;
@@ -12,11 +13,19 @@ namespace Hark.HarkPackageManager.Library
     {
         public User(
             string name,
-            string securedPassword,
+            byte[] securePassword,
+            bool isSPLevel1 = true,
             UserUID uid = null,
             List<GroupUID> groups = null)
         {
-            this.SecuredPassword = securedPassword;
+            if(isSPLevel1)
+            {
+                SHA256 hasher = SHA256Managed.Create();
+                this.SecurePasswordLevel2 = hasher.ComputeHash(securePassword);
+            }
+            else
+                this.SecurePasswordLevel2 = securePassword;
+                
             this.Groups = groups ?? new List<GroupUID>();
             this.Name = name;
             this.Uid = uid ?? UIDManager.Instance.Reserve().ForUser();
@@ -36,7 +45,7 @@ namespace Hark.HarkPackageManager.Library
             private set;
         }
         
-        public string SecuredPassword
+        public byte[] SecurePasswordLevel2
         {
             get;
             private set;
@@ -53,10 +62,13 @@ namespace Hark.HarkPackageManager.Library
     {
         public static User ReadUser(this Stream stream)
         {
+            int dataVersion = stream.ReadInt();
+            
             return new User(
                 uid : stream.ReadUid().ForUser(),
                 name : stream.ReadString(),
-                securedPassword : stream.ReadString(),
+                isSPLevel1 : false,
+                securePassword : stream.ReadWrapped(),
                 groups : new object[stream.ReadInt()]
                     .Select(_ => stream.ReadUid().ForGroup())
                     .ToList()
@@ -64,9 +76,11 @@ namespace Hark.HarkPackageManager.Library
         }
         public static void Write(this Stream stream, User user)
         {
+            stream.Write(1); // Data version (compatibility)
+            
             stream.Write(user.Uid);
             stream.Write(user.Name);
-            stream.Write(user.SecuredPassword);
+            stream.WriteWrapped(user.SecurePasswordLevel2);
             
             stream.Write(user.Groups.Count());
             user.Groups.ForEach(stream.Write);

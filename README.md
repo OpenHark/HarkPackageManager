@@ -104,42 +104,63 @@ new Regex(x.Replace("*", ".*"))
 
 | Command | Description |
 | --- | --- |
-| `hpm list` | List all packages |
-| `hpm list <pkg-name:shortregex>` | List matching packages |
-| `hpm versions <pkg-name:shortregex>` | List versions of the matching package |
-| `hpm version <version-uid:shortregex>` | Display the information of a version by its uid (use `hpm versions ...` to find the uid) |
+| `hpm list [<user>]` | List all packages |
+| `hpm list <pkg-name:shortregex> [<user>]` | List matching packages |
+| `hpm versions <pkg-name:shortregex> [<user>]` | List versions of the matching package |
+| `hpm version <version-uid:shortregex> [<user>]` | Display the information of a version by its uid (use `hpm versions ...` to find the uid) |
 | `hpm repo add <ip> <port>` | Add a repository |
 | `hpm repo remove <ip> <port>` | Remove a repository |
+
+The `<user>` information is with the format `Name@SecurePassword`.
+*Name* is the user name and *SecurePassword* is the encrypted user
+password. If *SecurePassword* is empty (`Name@`), then *hpm* will
+ask to type the password. The password provided in the short form
+(`Name@SecurePassword`) is a 64 base string of the SHA-256 of the
+password.
+
+For example :
+
+| Step | Description | Example |
+| --- | --- | --- |
+| 0 | Clear password | Chocolate |
+| 1 | Hash password with SHA-256 | { 166, 28, 37, 78, 111, 78, 95, 232, 110, 144, 172, 82, 190, 231, 205, 140, 131, 103, 178, 249, 181, 3, 16, 65, 15, 128, 36, 210, 158, 154, 172, 171 } |
+| 2 | Convert the resulting byte array into 64 base string | phwlTm9OX+hukKxSvufNjINnsvm1AxBBD4Ak0p6arKs= |
+| 3 | Add it to the user name in the short form | UserName@phwlTm9OX+hukKxSvufNjINnsvm1AxBBD4Ak0p6arKs= |
 
 ### <a name="execution-server"></a>Server
 
 | Command | Description |
 | --- | --- |
 | `hpmserver start` | Start the server |
+| `hpmserver restart` | Restart the server |
+| `hpmserver stop` | Stop all instances of the server |
 
-Here are some arguments taken by `hpmserver start` :
+Here are some arguments taken by `hpmserver start` and `hpmserver restart` :
 
 | Argument | Description |
 | --- | --- |
 | `-p / -port <port>` | Define the port to use |
 | `-scope {any / local}` | Define the scope of the server |
 
-
 ## <a name="tasks"></a>Tasks
 
-> A local package is a package create by the user and not deployed yet.
+> A local package is a package created by the user and not deployed yet.
 
 - Server
-  - [ ] Add `hpmserver stop` command
+  - [X] Add `hpmserver restart` command
+  - [X] Add `hpmserver stop` command
   - [ ] Add web server
 - Client
-  - [ ] Add secured password console (for user system)
   - [ ] Add cryptography (to encrypt/decrypt packages)
   - [ ] Add list of installed packages and installed versions
-  - [ ] Add command `new create <pkg-info...>` (create a new local package)
-  - [ ] Add command `new edit <pkg-info...>` (edit a local package)
-  - [ ] Add command `new add right <pkg-info...> <pkg-rights>` (add rights to a local package)
-  - [ ] Add command `new remove right <pkg-info...> <pkg-rights>` (add rights to a local package)
+  - [ ] Add command `installed [<pkg-info...>]` (list installed packages)
+  - [X] Add command `new create <pkg-info...>` (create a new local package)
+  - [X] Add command `new edit <pkg-info...>` (edit a local package)
+  - [ ] Add command `new show <pkg-info...>` (show information about a local package)
+  - [ ] Add command `new add right <pkg-info...> <access-restrict>` (add rights to a local package)
+  - [ ] Add command `new remove right <pkg-info...> <access-restrict>` (add rights to a local package)
+  - [ ] Add command `new add owner <pkg-info...> <access-restrict>` (add owner to a local package)
+  - [ ] Add command `new remove owner <pkg-info...> <access-restrict>` (add owner to a local package)
   - [ ] Add command `new add file <pkg-info...> <file-folder-path>` (create a zip and add it to a local package)
   - [ ] Add command `new remove <pkg-info...> <file-folder-path>` (remove a zip from a local package)
 - Library
@@ -148,8 +169,9 @@ Here are some arguments taken by `hpmserver start` :
   - [X] Finish *Extensions* in *PackageVersion* | `PackageVersion.cs`
   - [X] Sort extensions
   - [X] Add user permissions | {everybody, some, only me}
+  - [X] Add secure password console (for user system)
 - Client/Server
-  - [ ] Add optional "secured" dialog
+  - [ ] Add optional "secure" dialog
   - [ ] Add command `download <pkg>` (download a file in the current folder)
   - [ ] Add command `install <pkg>` (install a package and its dependencies)
   - [ ] Add command `publish <pkg-info...>` (publish a local package to a repository)
@@ -167,7 +189,7 @@ Here are some arguments taken by `hpmserver start` :
 
 ### Hub
 
-That would be nice if we can share our packages.
+That would be nice if we could share our packages.
 I belive that the best way to do so would be to have a hub
 server which provides a link between repositories of different
 people. There would be public repositories and private ones.

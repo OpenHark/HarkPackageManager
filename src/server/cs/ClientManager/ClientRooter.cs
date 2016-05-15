@@ -77,8 +77,9 @@ namespace Hark.HarkPackageManager.Server
                     .Select(cm => cm.Execute(stream, Context))
                     .First();
             }
-            catch
+            catch(Exception ex)
             {
+                Console.WriteLine(ex);
                 return false;
             }
         }

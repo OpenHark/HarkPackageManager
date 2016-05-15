@@ -93,6 +93,22 @@ namespace System.IO
             stream.Write(data, 0, data.Length);
         }
         
+        public static byte[] ReadWrapped(this Stream stream)
+        {
+            int size = stream.ReadInt();
+            
+            byte[] data = new byte[size];
+            int index = 0;
+            while((index += stream.Read(data, index, size - index)) < size)
+                ;
+            return data;
+        }
+        public static void WriteWrapped(this Stream stream, byte[] data)
+        {
+            stream.Write(data.Length);
+            stream.Write(data);
+        }
+        
         public static void Write(this Stream stream, BigInteger value)
         {
             byte[] data = value.ToByteArray();

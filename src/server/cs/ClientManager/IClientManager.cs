@@ -1,6 +1,8 @@
 using Hark.HarkPackageManager.Library;
 using Hark.HarkPackageManager;
 
+using System.Security.Cryptography;
+using System.Diagnostics;
 using System.Linq;
 using System.IO;
 using System;
@@ -64,15 +66,24 @@ namespace Hark.HarkPackageManager.Server
         {
             lock(this)
             {
+                stream.ReadTimeout = Timeout;
+                
                 this.UserAuthentication = stream.ReadUserAuthentication();
                 this.ClientStream = stream;
                 this.Context = context;
-                this.User = Context.Users
-                    .Where(u => u.Name == UserAuthentication.Name)
-                    .Where(u => u.SecuredPassword == UserAuthentication.SecuredPassword)
-                    .FirstOrDefault();
                 
-                stream.ReadTimeout = Timeout;
+                if(this.UserAuthentication.IsNoUser)
+                    this.User = null;
+                else
+                {
+                    SHA256 hasher = SHA256Managed.Create();
+                    byte[] securePasswordLevel2 = hasher.ComputeHash(this.UserAuthentication.SecurePasswordLevel1);
+
+                    this.User = securePasswordLevel2 == null ? null : Context.Users
+                        .Where(u => u.Name.ToLower() == UserAuthentication.Name.ToLower())
+                        .Where(u => Enumerable.SequenceEqual(u.SecurePasswordLevel2, securePasswordLevel2))
+                        .FirstOrDefault();
+                }
                 
                 return Execute();
             }
