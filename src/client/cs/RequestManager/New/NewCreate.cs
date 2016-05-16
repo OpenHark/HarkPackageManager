@@ -21,19 +21,16 @@ namespace Hark.HarkPackageManager.Client
                 return;
             }
             
-            string fileName = name.ToLower() + ".pkg";
-            if(File.Exists(fileName))
-            {
-                Console.Error.WriteLine("Can't create the local package file {0} because it exists.", fileName);
+            string fileName;
+            if(!NewExists(name, out fileName, false))
                 return;
-            }
             
             using(Stream stream = File.Open(fileName, FileMode.CreateNew))
             {
                 stream.Write(new PackageBuilder(name, version));
             }
                 
-            Console.WriteLine("Pacakge {0} created.", fileName);
+            Console.WriteLine("Package {0} created.", fileName);
         }
     }
 }

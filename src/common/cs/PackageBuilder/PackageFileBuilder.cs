@@ -17,7 +17,7 @@ namespace Hark.HarkPackageManager.Library
             List<string> files = null
         )
         {
-            this.DestinationPath = DestinationPath;
+            this.DestinationPath = destinationPath;
             this.Description = description;
             this.Folders = folders ?? new List<string>();
             this.Files = files ?? new List<string>();
@@ -53,14 +53,16 @@ namespace Hark.HarkPackageManager.Library
         public static PackageFileBuilder ReadPackageFileBuilder(this Stream stream)
         {
             int dataVersion = stream.ReadInt();
-            
+            Console.WriteLine("dddddddddddddd " + dataVersion);
             return new PackageFileBuilder(
                 description : stream.ReadString(),
                 destinationPath : stream.ReadString(),
                 folders : new object[stream.ReadInt()]
+                    .Peek(_ => Console.WriteLine("66666666"))
                     .Select(_ => stream.ReadString())
                     .ToList(),
                 files : new object[stream.ReadInt()]
+                    .Peek(_ => Console.WriteLine("77777777777"))
                     .Select(_ => stream.ReadString())
                     .ToList()
             );

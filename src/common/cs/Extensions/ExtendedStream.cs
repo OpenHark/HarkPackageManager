@@ -171,7 +171,12 @@ namespace System.IO
         
         public static int? ReadIntNull(this Stream stream)
         {
-            return null;
+            bool isNull = stream.ReadBool();
+            
+            if(isNull)
+                return null;
+            else
+                return stream.ReadInt();
         }
         public static void Write(this Stream stream, int? value)
         {

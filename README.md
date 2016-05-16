@@ -156,22 +156,27 @@ Here are some arguments taken by `hpmserver start` and `hpmserver restart` :
   - [ ] Add command `installed [<pkg-info...>]` (list installed packages)
   - [X] Add command `new create <pkg-info...>` (create a new local package)
   - [X] Add command `new edit <pkg-info...>` (edit a local package)
-  - [ ] Add command `new show <pkg-info...>` (show information about a local package)
-  - [ ] Add command `new add right <pkg-info...> <access-restrict>` (add rights to a local package)
-  - [ ] Add command `new remove right <pkg-info...> <access-restrict>` (add rights to a local package)
-  - [ ] Add command `new add owner <pkg-info...> <access-restrict>` (add owner to a local package)
-  - [ ] Add command `new remove owner <pkg-info...> <access-restrict>` (add owner to a local package)
-  - [ ] Add command `new add file <pkg-info...> <file-folder-path>` (create a zip and add it to a local package)
-  - [ ] Add command `new remove <pkg-info...> <file-folder-path>` (remove a zip from a local package)
+  - [X] Add command `new show <pkg-info...>` (show information about a local package)
+  - [X] Add command `new right add <pkg-info...> <access-restrict>` (add rights to a local package)
+  - [X] Add command `new right remove <pkg-info...> <access-restrict>` (remove rights to a local package)
+  - [X] Add command `new dependency add <pkg-info...> <access-restrict>` (add dependencys to a local package)
+  - [X] Add command `new dependency remove <pkg-info...> <access-restrict>` (remove dependencys to a local package)
+  - [X] Add command `new owner add <pkg-info...> <access-restrict>` (add owner to a local package)
+  - [X] Add command `new owner remove <pkg-info...> <access-restrict>` (remove owner to a local package)
+  - [X] Add command `new file add <pkg-info...> <file-folder-path>` (add files to a local package)
+  - [X] Add command `new file remove <pkg-info...> <file-folder-path>` (remove a zip from a local package)
 - Library
   - [X] Finish *Dependency* | `Dependency.cs`
-  - [ ] Finish *PackageFile* | `PackageFile.cs`
+  - [X] Finish *PackageFile* | `PackageFile.cs`
   - [X] Finish *Extensions* in *PackageVersion* | `PackageVersion.cs`
   - [X] Sort extensions
   - [X] Add user permissions | {everybody, some, only me}
   - [X] Add secure password console (for user system)
 - Client/Server
   - [ ] Add optional "secure" dialog
+  - [X] Add command `user list <user-regex>` (list all users with matching regex)
+  - [ ] Add command `user new <name@password>` (create a new user)
+  - [ ] Add command `user delete <name@password>` (delete a user)
   - [ ] Add command `download <pkg>` (download a file in the current folder)
   - [ ] Add command `install <pkg>` (install a package and its dependencies)
   - [ ] Add command `publish <pkg-info...>` (publish a local package to a repository)

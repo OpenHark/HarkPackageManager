@@ -13,13 +13,9 @@ namespace Hark.HarkPackageManager.Client
     {
         public void NewDisplay(string name)
         {
-            string fileName = name.Trim().ToLower() + ".pkg";
-            
-            if(!File.Exists(fileName))
-            {
-                Console.Error.WriteLine("Can't find the local package \"{0}\"", fileName);
+            string fileName;
+            if(!NewExists(name, out fileName))
                 return;
-            }
             
             using(Stream stream = File.Open(fileName, FileMode.Open))
             {
@@ -32,9 +28,9 @@ namespace Hark.HarkPackageManager.Client
                 Console.WriteLine(" Description : {0}", pb.Description);
                 Console.WriteLine(" Repository name : {0}", pb.RepositoryName);
                 
-                string substr = "   {0}";
+                string substrId = "   {0} :: {1}";
                 
-                Console.WriteLine(" Files :");
+                Console.WriteLine(" File" + pb.Files.Count().ToPlural("s") + " :");
                 int i = 0;
                 foreach(var f in pb.Files)
                 {
@@ -42,21 +38,29 @@ namespace Hark.HarkPackageManager.Client
                     string substr3 = "         {0}";
                     
                     ++i;
-                    Console.WriteLine(substr, i);
+                    Console.WriteLine(substrId, i, "");
                     Console.WriteLine(substr2, "Description", f.Description);
                     Console.WriteLine(substr2, "Destination path", f.DestinationPath);
                     
-                    Console.WriteLine(substr2, "Files", "");
+                    Console.WriteLine(substr2, "File(s)", "");
                     f.Files.ForEach(s => Console.WriteLine(substr3, s));
                     
-                    Console.WriteLine(substr2, "Folders", "");
+                    Console.WriteLine(substr2, "Folder(s)", "");
                     f.Folders.ForEach(s => Console.WriteLine(substr3, s));
                 }
-                        
-                Console.WriteLine(" Dependencies :");
+                
+                Console.WriteLine(" Dependenc" + pb.Dependencies.Count().ToPlural("ies", "y") + " :");
                 pb.Dependencies
                     .Select(d => d.Uid.ToString() + " / " + (d.VersionMin ?? 0))
-                    .ForEach(s => Console.WriteLine(substr, s));
+                    .ForEach((s,id) => Console.WriteLine(substrId, id + 1, s));
+                
+                Console.WriteLine(" Access restriction" + pb.AccessRestrictions.Count().ToPlural("s") + " :");
+                pb.AccessRestrictions
+                    .ForEach((s,id) => Console.WriteLine(substrId, id + 1, s));
+                    
+                Console.WriteLine(" Owner filter" + pb.OwnerRestrictions.Count().ToPlural("s") + " :");
+                pb.OwnerRestrictions
+                    .ForEach((s,id) => Console.WriteLine(substrId, id + 1, s));
             }
         }
     }

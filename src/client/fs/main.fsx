@@ -7,6 +7,7 @@
 namespace Hark.HarkPackageManager.Client.Starter
 
 open System.Text.RegularExpressions
+open System.Collections.Generic
 open System.IO.Compression
 open System.Net.Sockets
 open System.Linq
@@ -38,11 +39,17 @@ module public Methods =
         abstract member NewCreate : string * int -> unit // pkg name * version
         abstract member NewDisplay : string -> unit // pkg name
         abstract member NewEdit : string * string * string * Nullable<int> * Nullable<bool> * Nullable<PackageState> * string -> unit // pkg name * repo new name * pkg new name * version * is stable * state * description
-(*        abstract member NewAddRight : string * AccessRestriction -> unit // pkg name * right
-        abstract member NewRemoveRight : string * AccessRestriction -> unit // pkg name * right
-        abstract member NewAddFile :  -> unit // 
-        abstract member NewRemoveFile :  -> unit // 
-*)
+        abstract member NewFileAdd : string * string * List<string> * List<string> * string -> unit // name * destination path * files * folders * description
+        abstract member NewFileRemove : string * int -> unit // name * file index
+        abstract member NewRightAdd : string * AccessRestriction -> unit // name * right
+        abstract member NewRightRemove : string * int -> unit // name * right index
+        abstract member NewOwnerAdd : string * AccessRestriction -> unit // name * right
+        abstract member NewOwnerRemove : string * int -> unit // name * right index
+        abstract member NewDependencyAdd : string * Dependency -> unit // name * dependency * version
+        abstract member NewDependencyRemove : string * int -> unit // name * dependency index
+        
+        abstract member UserList : string -> unit // name
+
     let mutable RequestManager : IRequestManager = null
 
 module public EntryPoint =
@@ -57,6 +64,8 @@ module public EntryPoint =
         with
         | _ -> None
 
+    let (|UID|_|) = Parse.tryParseWith UID.TryParse
+    
     let (|UA|_|) (x : string) =
         let tx = x.Trim()
         match Parse.tryParseWith UserAuthentication.TryParse tx with
@@ -136,14 +145,61 @@ module public EntryPoint =
         | CantParseArgs(p) ->
             "Can't parse the parameter \"" + p + "\"." |> Console.Error.WriteLine
         
+    | "new"::"file"::"remove"::name::Parse.Int(index)::[] when index > 0 ->
+        rm.Value.NewFileRemove(name, index + 1)
+        
+    | "new"::"file"::"add"::name::destPath::desc::args ->
+        let rec splitArgs (wasFile : bool) (wasFolder : bool) (files : List<string>) (folders : List<string>) = function
+        | [] -> (files, folders)
+        | "-files"::e ->
+            splitArgs true false files folders e
+        | "-folders"::e ->
+            splitArgs false true files folders e
+        | x::e when wasFile ->
+            files.Add(x)
+            splitArgs wasFile wasFolder files folders e
+        | x::e when wasFolder ->
+            folders.Add(x)
+            splitArgs wasFile wasFolder files folders e
+        | x::_ -> raise (CantParseArgs(x))
+        
+        let (files, folders) = splitArgs false false (new List<string>()) (new List<string>()) args
+        rm.Value.NewFileAdd(name, destPath, files, folders, desc)
+        
+    | "new"::"right"::"remove"::name::Parse.Int(index)::[] when index > 0 ->
+        rm.Value.NewRightRemove(name, index + 1)
+        
+    | "new"::"right"::"add"::"user"::name::UID(uid)::[] ->
+        rm.Value.NewRightAdd(name, new UserAccessRestriction(uid.ForUser()))
+    | "new"::"right"::"add"::"group"::name::UID(uid)::[] ->
+        rm.Value.NewRightAdd(name, new GroupAccessRestriction(uid.ForGroup()))
+        
+    | "new"::"owner"::"remove"::name::Parse.Int(index)::[] when index > 0 ->
+        rm.Value.NewOwnerRemove(name, index + 1)
+        
+    | "new"::"owner"::"add"::"user"::name::UID(uid)::[] ->
+        rm.Value.NewOwnerAdd(name, new UserAccessRestriction(uid.ForUser()))
+    | "new"::"owner"::"add"::"group"::name::UID(uid)::[] ->
+        rm.Value.NewOwnerAdd(name, new GroupAccessRestriction(uid.ForGroup()))
+        
+    | "new"::"dependency"::"remove"::name::Parse.Int(index)::[] when index > 0 ->
+        rm.Value.NewDependencyRemove(name, index + 1)
+        
+    | "new"::"dependency"::"add"::name::UID(uid)::[] ->
+        rm.Value.NewDependencyAdd(name, new Dependency(Nullable(), uid.ForPackage()))
+    | "new"::"dependency"::"add"::name::UID(uid)::Parse.Int(version)::[] ->
+        rm.Value.NewDependencyAdd(name, new Dependency(Nullable version, uid.ForPackage()))
+
+    | "user"::"list"::regex::[] ->
+        rm.Value.UserList(regex)
+        
     | _ ->
         // Display help
         Std.displayHeader ()
         console {
             return "Usages"
             yield! [
-                " " + information.APP_NAME + " start"
-                " " + information.APP_NAME + " start ?"
+                " " + information.APP_NAME + " ? :: Display this help"
             ]
             return ""
         }

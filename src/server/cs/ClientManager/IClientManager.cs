@@ -53,7 +53,7 @@ namespace Hark.HarkPackageManager.Server
             private set;
         }
         
-        public AccessRestrictionArgs CreateAccessestrictionArgs()
+        public AccessRestrictionArgs CreateAccessRestrictionArgs()
         {
             return new AccessRestrictionArgs(
                 users : Context.Users,

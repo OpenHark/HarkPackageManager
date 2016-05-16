@@ -33,6 +33,11 @@ namespace Hark.HarkPackageManager.Library
                 args.User.Groups.Any(g => g == GroupUid);
         }
         
+        public override string ToString()
+        {
+            return "Group filter : " + GroupUid;
+        }
+        
         public class StreamBuilder : IAccessRestrictionBuilder
         {
             public int TypeId

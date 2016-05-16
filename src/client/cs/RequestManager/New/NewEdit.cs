@@ -31,13 +31,9 @@ namespace Hark.HarkPackageManager.Client
                 return;
             }
             
-            string fileName = name.Trim().ToLower() + ".pkg";
-            
-            if(!File.Exists(fileName))
-            {
-                Console.Error.WriteLine("The package {0} doesn't exists.", fileName);
+            string fileName;
+            if(!NewExists(name, out fileName))
                 return;
-            }
             
             PackageBuilder pb;
             using(Stream stream = File.Open(fileName, FileMode.Open))

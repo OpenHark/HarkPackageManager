@@ -2,6 +2,7 @@ using Hark.HarkPackageManager;
 
 using System.Numerics;
 using System.IO;
+using System;
 
 namespace Hark.HarkPackageManager.Library
 {
@@ -13,8 +14,6 @@ namespace Hark.HarkPackageManager.Library
         {
             this.VersionMin = versionMin;
             this.Uid = uid ?? UIDManager.Instance.Reserve().ForPackage();
-            
-            UIDManager.Instance.Update(this.Uid);
         }
         
         public PackageUID Uid

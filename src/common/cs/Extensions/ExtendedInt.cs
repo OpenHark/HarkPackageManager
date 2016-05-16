@@ -24,9 +24,9 @@ namespace System
             };
         }
         
-        public static string ToPlural(this int value, string pluralString = "s")
+        public static string ToPlural(this int value, string pluralString = "s", string singularString = "")
         {
-            return value >= 2 ? pluralString : "";
+            return value >= 2 ? pluralString : singularString;
         }
     }   
 }

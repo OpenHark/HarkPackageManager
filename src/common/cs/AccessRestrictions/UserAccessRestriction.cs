@@ -32,6 +32,11 @@ namespace Hark.HarkPackageManager.Library
             return args.User != null && args.User.Uid == UserUid;
         }
         
+        public override string ToString()
+        {
+            return "User filter : " + UserUid;
+        }
+        
         public class StreamBuilder : IAccessRestrictionBuilder
         {
             public int TypeId

@@ -10,20 +10,22 @@ using System;
 namespace Hark.HarkPackageManager.Server.Commands
 {
     [ClientManagerAttribute]
-    public class List : IClientManager
+    public class UserList : IClientManager
     {
-        public List()
-            : base("list")
+        public UserList()
+            : base("user-list")
         { }
         
         protected override bool Execute()
         {
             ClientStream.Write(true);
             
+            Regex regex = ClientStream.ReadWord().ToWildcardRegex();
+            
             lock(Context)
             {
-                Context.PackagesByName(ClientStream.ReadWord())
-                    .Where(p => p.IsAuthorized(CreateAccessRestrictionArgs()))
+                Context.Users
+                    .Where(u => regex.IsMatch(u.Name))
                     .Global(e => ClientStream.Write(e.Count()))
                     .ForEach(ClientStream.Write);
             }
