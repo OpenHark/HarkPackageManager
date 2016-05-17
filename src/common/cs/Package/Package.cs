@@ -77,7 +77,8 @@ namespace Hark.HarkPackageManager.Library
         
         public bool IsAuthorized(AccessRestrictionArgs args)
         {
-            return AccessRestrictions
+            return AccessRestrictions.Count == 0 ||
+                AccessRestrictions
                 .Any(a => a.CanAccess(args));
         }
     }
