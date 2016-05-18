@@ -12,24 +12,16 @@ namespace Hark.HarkPackageManager.Library
     {
         public PackageFileBuilder(
             string description = null,
-            string destinationPath = null,
             List<string> folders = null,
             List<string> files = null
         )
         {
-            this.DestinationPath = destinationPath;
             this.Description = description;
             this.Folders = folders ?? new List<string>();
             this.Files = files ?? new List<string>();
         }
         
         public string Description
-        {
-            get;
-            set;
-        }
-        
-        public string DestinationPath
         {
             get;
             set;
@@ -53,16 +45,13 @@ namespace Hark.HarkPackageManager.Library
         public static PackageFileBuilder ReadPackageFileBuilder(this Stream stream)
         {
             int dataVersion = stream.ReadInt();
-            Console.WriteLine("dddddddddddddd " + dataVersion);
+            
             return new PackageFileBuilder(
                 description : stream.ReadString(),
-                destinationPath : stream.ReadString(),
                 folders : new object[stream.ReadInt()]
-                    .Peek(_ => Console.WriteLine("66666666"))
                     .Select(_ => stream.ReadString())
                     .ToList(),
                 files : new object[stream.ReadInt()]
-                    .Peek(_ => Console.WriteLine("77777777777"))
                     .Select(_ => stream.ReadString())
                     .ToList()
             );
@@ -72,7 +61,6 @@ namespace Hark.HarkPackageManager.Library
             stream.Write(1); // Data version (compatibility)
             
             stream.Write(pkgFileBuilder.Description);
-            stream.Write(pkgFileBuilder.DestinationPath);
             
             stream.Write(pkgFileBuilder.Folders.Count());
             pkgFileBuilder.Folders.ForEach(stream.Write);

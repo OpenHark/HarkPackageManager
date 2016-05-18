@@ -15,15 +15,17 @@ namespace Hark.HarkPackageManager.Library
             bool isStable,
             string description,
             PackageUID package,
+            PackageFile installer = null,
             PackageVersionUID uid = null,
             List<Dependency> dependencies = null,
             List<PackageFile> files = null)
         {
             this.Dependencies = dependencies ?? new List<Dependency>();
             this.Description = description;
+            this.PackageUid = package;
+            this.Installer = installer;
             this.IsStable = isStable;
             this.Version = version;
-            this.PackageUid = package;
             this.Files = files ?? new List<PackageFile>();
             this.Uid = uid ?? UIDManager.Instance.Reserve().ForPackageVersion();
             
@@ -66,6 +68,11 @@ namespace Hark.HarkPackageManager.Library
             get;
             private set;
         }
+        public PackageFile Installer
+        {
+            get;
+            private set;
+        }
     }
     
     public static partial class Extensions
@@ -79,6 +86,10 @@ namespace Hark.HarkPackageManager.Library
             stream.Write(value.Version);
             stream.Write(value.IsStable);
             stream.Write(value.Description);
+            
+            stream.Write(value.Installer != null);
+            if(value.Installer != null)
+                stream.Write(value.Installer);
             
             stream.Write(value.Dependencies.Count());
             value.Dependencies.ForEach(stream.Write);
@@ -98,6 +109,7 @@ namespace Hark.HarkPackageManager.Library
                 version : stream.ReadInt(),
                 isStable : stream.ReadBool(),
                 description : stream.ReadString(),
+                installer : stream.ReadBool() ? stream.ReadPackageFile() : null,
                 dependencies : new object[stream.ReadInt()]
                     .Select(_ => stream.ReadDependency())
                     .ToList(),

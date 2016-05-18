@@ -27,10 +27,11 @@ namespace Hark.HarkPackageManager.Client
                 Console.WriteLine(" State : {0}", pb.State);
                 Console.WriteLine(" Description : {0}", pb.Description);
                 Console.WriteLine(" Repository name : {0}", pb.RepositoryName);
+                Console.WriteLine(" Installer : {0}", pb.Installer);
                 
                 string substrId = "   {0} :: {1}";
                 
-                Console.WriteLine(" File" + pb.Files.Count().ToPlural("s") + " :");
+                Console.WriteLine(" Files :");
                 int i = 0;
                 foreach(var f in pb.Files)
                 {
@@ -40,25 +41,28 @@ namespace Hark.HarkPackageManager.Client
                     ++i;
                     Console.WriteLine(substrId, i, "");
                     Console.WriteLine(substr2, "Description", f.Description);
-                    Console.WriteLine(substr2, "Destination path", f.DestinationPath);
                     
                     Console.WriteLine(substr2, "File(s)", "");
-                    f.Files.ForEach(s => Console.WriteLine(substr3, s));
+                    f.Files
+                        .DefaultIfEmpty("<None>")
+                        .ForEach(s => Console.WriteLine(substr3, s));
                     
                     Console.WriteLine(substr2, "Folder(s)", "");
-                    f.Folders.ForEach(s => Console.WriteLine(substr3, s));
+                    f.Folders
+                        .DefaultIfEmpty("<None>")
+                        .ForEach(s => Console.WriteLine(substr3, s));
                 }
                 
-                Console.WriteLine(" Dependenc" + pb.Dependencies.Count().ToPlural("ies", "y") + " :");
+                Console.WriteLine(" Dependencies :");
                 pb.Dependencies
                     .Select(d => d.Uid.ToString() + " / " + (d.VersionMin ?? 0))
                     .ForEach((s,id) => Console.WriteLine(substrId, id + 1, s));
                 
-                Console.WriteLine(" Access restriction" + pb.AccessRestrictions.Count().ToPlural("s") + " :");
+                Console.WriteLine(" Access restrictions :");
                 pb.AccessRestrictions
                     .ForEach((s,id) => Console.WriteLine(substrId, id + 1, s));
-                    
-                Console.WriteLine(" Owner filter" + pb.OwnerRestrictions.Count().ToPlural("s") + " :");
+                
+                Console.WriteLine(" Owner filters :");
                 pb.OwnerRestrictions
                     .ForEach((s,id) => Console.WriteLine(substrId, id + 1, s));
             }

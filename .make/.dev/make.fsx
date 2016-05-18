@@ -134,7 +134,7 @@ module Runtime =
             |> die
                 
             encache filesToCompile
-            projName + " Library compiled." |> Console.WriteLine
+            projName + " compiled." |> Console.WriteLine
         else
             "Nothing to recompile for " + projName + "." |> Console.WriteLine
 

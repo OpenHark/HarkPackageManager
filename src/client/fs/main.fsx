@@ -39,7 +39,8 @@ module public Methods =
         abstract member NewCreate : string * int -> unit // pkg name * version
         abstract member NewDisplay : string -> unit // pkg name
         abstract member NewEdit : string * string * string * Nullable<int> * Nullable<bool> * Nullable<PackageState> * string -> unit // pkg name * repo new name * pkg new name * version * is stable * state * description
-        abstract member NewFileAdd : string * string * List<string> * List<string> * string -> unit // name * destination path * files * folders * description
+        abstract member NewFileAdd : string * List<string> * List<string> * string -> unit // name * files * folders * description
+        abstract member NewInstaller : string * string -> unit // name * installer file path
         abstract member NewFileRemove : string * int -> unit // name * file index
         abstract member NewRightAdd : string * AccessRestriction -> unit // name * right
         abstract member NewRightRemove : string * int -> unit // name * right index
@@ -148,7 +149,7 @@ module public EntryPoint =
     | "new"::"file"::"remove"::name::Parse.Int(index)::[] when index > 0 ->
         rm.Value.NewFileRemove(name, index + 1)
         
-    | "new"::"file"::"add"::name::destPath::desc::args ->
+    | "new"::"file"::"add"::name::desc::args ->
         let rec splitArgs (wasFile : bool) (wasFolder : bool) (files : List<string>) (folders : List<string>) = function
         | [] -> (files, folders)
         | "-files"::e ->
@@ -164,7 +165,12 @@ module public EntryPoint =
         | x::_ -> raise (CantParseArgs(x))
         
         let (files, folders) = splitArgs false false (new List<string>()) (new List<string>()) args
-        rm.Value.NewFileAdd(name, destPath, files, folders, desc)
+        rm.Value.NewFileAdd(name, files, folders, desc)
+        
+    | "new"::"installer"::name::installerPath::[] ->
+        rm.Value.NewInstaller(name, installerPath)
+    | "new"::"installer"::name::[] ->
+        rm.Value.NewInstaller(name, "")
         
     | "new"::"right"::"remove"::name::Parse.Int(index)::[] when index > 0 ->
         rm.Value.NewRightRemove(name, index + 1)

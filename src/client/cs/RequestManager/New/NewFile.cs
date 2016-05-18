@@ -13,7 +13,6 @@ namespace Hark.HarkPackageManager.Client
     {
         public void NewFileAdd(
             string name,
-            string destinationPath,
             List<string> files,
             List<string> folders,
             string description)
@@ -22,7 +21,6 @@ namespace Hark.HarkPackageManager.Client
                 name,
                 pb => pb.Files,
                 () => new PackageFileBuilder(
-                    destinationPath : destinationPath,
                     description : description,
                     folders : folders,
                     files : files

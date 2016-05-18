@@ -107,6 +107,15 @@ namespace Hark.HarkPackageManager.Library
                 return packageVersion.Files;
             }
         }
+        
+        public PackageFile Installer
+        {
+            get
+            {
+                Load();
+                return packageVersion.Installer;
+            }
+        }
     }
     
     public static partial class Extensions

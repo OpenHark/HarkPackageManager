@@ -17,6 +17,7 @@ namespace Hark.HarkPackageManager.Library
             string repositoryName = null,
             PackageState state = PackageState.Release,
             string description = null,
+            string installer = null,
             List<Dependency> dependencies = null,
             List<PackageFileBuilder> files = null,
             List<AccessRestriction> ownerRestrictions = null,
@@ -31,6 +32,7 @@ namespace Hark.HarkPackageManager.Library
             this.RepositoryName = repositoryName ?? "";
             this.PackageName = packageName;
             this.Description = description ?? "";
+            this.Installer = installer ?? "";
             this.IsStable = isStable;
             this.Version = version;
             this.State = state;
@@ -96,6 +98,19 @@ namespace Hark.HarkPackageManager.Library
             private set;
         }
         
+        private string installer;
+        public string Installer
+        {
+            get
+            {
+                return installer;
+            }
+            set
+            {
+                installer = value ?? "";
+            }
+        }
+        
         public void Produce(
             string destinationPath = null,
             bool overrideExisting = true)
@@ -129,6 +144,7 @@ namespace Hark.HarkPackageManager.Library
                 isStable : stream.ReadBool(),
                 state : stream.ReadPackageState(),
                 description : stream.ReadString(),
+                installer : stream.ReadString(),
                 accessRestrictions : new object[stream.ReadInt()]
                     .Select(_ => stream.ReadAccessRestriction())
                     .ToList(),
@@ -153,6 +169,7 @@ namespace Hark.HarkPackageManager.Library
             stream.Write(pkgBuilder.IsStable);
             stream.Write(pkgBuilder.State);
             stream.Write(pkgBuilder.Description);
+            stream.Write(pkgBuilder.Installer);
             
             stream.Write(pkgBuilder.AccessRestrictions.Count());
             pkgBuilder.AccessRestrictions.ForEach(stream.Write);

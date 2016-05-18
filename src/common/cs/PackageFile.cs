@@ -9,10 +9,8 @@ namespace Hark.HarkPackageManager.Library
     {
         public PackageFile(
             string description,
-            string destinationPath,
             UID uid = null)
         {
-            this.DestinationPath = destinationPath;
             this.Description = description;
             this.UID = uid ?? UIDManager.Instance.Reserve();
             
@@ -30,12 +28,6 @@ namespace Hark.HarkPackageManager.Library
             get;
             set;
         }
-        
-        public string DestinationPath
-        {
-            get;
-            set;
-        }
     }
     
     public static partial class Extensions
@@ -46,8 +38,7 @@ namespace Hark.HarkPackageManager.Library
             
             return new PackageFile(
                 uid : stream.ReadUid(),
-                description : stream.ReadString(),
-                destinationPath : stream.ReadString()
+                description : stream.ReadString()
             );
         }
         public static void Write(this Stream stream, PackageFile packageFile)
@@ -56,7 +47,6 @@ namespace Hark.HarkPackageManager.Library
             
             stream.Write(packageFile.UID);
             stream.Write(packageFile.Description);
-            stream.Write(packageFile.DestinationPath);
                 
             stream.Flush();
         }

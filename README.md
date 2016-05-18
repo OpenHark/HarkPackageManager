@@ -113,13 +113,14 @@ new Regex(x.Replace("*", ".*"))
 | `hpm new create <pkg-name> [<version>]` | Create a new local package |
 | `hpm new edit <pkg-name> [-v <version>] [-stable {yes/no}] [-name <name>] [-repository <name>] [-desc <desc>] [-state <state>]` | Edit the information of a local package |
 | `hpm new show <pkg-name>` | Show the information of a local package |
+| `hpm new installer <pkg-name> <installer-path>` | Set an installer to the package |
 | `hpm new right add {user/group} <pkg-name> <uid>` | Add an access restriction to a local package |
 | `hpm new right remove <pkg-name> <index>` | Remove an access restriction from a local package |
 | `hpm new owner add {user/group} <pkg-name> <uid>` | Add an owner restriction to a local package |
 | `hpm new owner remove <pkg-name> <index>` | Remove an owner restriction from a local package |
 | `hpm new dependency add <pkg-name> <uid> [<version-min>]` | Add a dependency to a local package |
 | `hpm new dependency remove <pkg-name> <index>` | Remove a dependency from a local package |
-| `hpm new file add <pkg-name> <install-dest-path> <desc> [-files <files...>] [-folders <folders...>]` | Add a package file to a local package |
+| `hpm new file add <pkg-name> <desc> [-files <files...>] [-folders <folders...>]` | Add a package file to a local package |
 | `hpm new file remove <pkg-name> <index>` | Remove a package file from a local package |
 | `hpm user list <user-name-regex>` | List all matching users |
 
@@ -206,6 +207,8 @@ Here are some arguments taken by `hpmserver start` and `hpmserver restart` :
   - [ ] Add command `groupe rights <user> <groupe> <bitwise-rights>` (change the rights of a user in a group)
   - [ ] Add command `groupe create <groupe>` (create a new group)
   - [ ] Add command `groupe delete <groupe>` (delete an existing group)
+- Installer
+  - [ ] Create a library for installers
 
 ## <a name="future"></a>Future
 

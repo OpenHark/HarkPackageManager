@@ -44,5 +44,10 @@ namespace Hark.HarkPackageManager.Library
         {
             get;
         }
+        
+        PackageFile Installer
+        {
+            get;
+        }
     }
 }
